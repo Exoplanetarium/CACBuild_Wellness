@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-cacbuildwellness-dev-101223-authRole",
+      "UnauthRoleArn": "arn:aws:iam::345041079132:role/amplify-cacbuildwellness-dev-101223-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::345041079132:role/amplify-cacbuildwellness-dev-101223-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-cacbuildwellness-dev-101223-deployment",
+      "UnauthRoleName": "amplify-cacbuildwellness-dev-101223-unauthRole",
+      "StackName": "amplify-cacbuildwellness-dev-101223",
+      "StackId": "arn:aws:cloudformation:us-east-1:345041079132:stack/amplify-cacbuildwellness-dev-101223/aec1fe00-ea01-11ee-b7f0-0affea2ad073",
+      "AmplifyAppId": "dd3m11j3gei6v"
+    },
+    "categories": {
+      "api": {
+        "cacbuildwellness": {}
+      }
+    }
+  }
+}
