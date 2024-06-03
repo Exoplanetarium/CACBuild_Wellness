@@ -1,9 +1,9 @@
 import { Button, StyleSheet, Text, View, Image } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
-import { GestureDetector, Gesture } from 'react-native-gesture-handler';
+import { GestureDetector, Gesture, GestureHandlerRootView } from 'react-native-gesture-handler';
 
-export default function Background() {
+export default function PanBackground() {
 
     const mousePosition = useSharedValue({ horizontal: 0, vertical: 0 });
     const mousePositionLastOffset = useSharedValue({ horizontal: 0, vertical: 0 });
@@ -27,16 +27,24 @@ export default function Background() {
     }));
     
     return (
-        <GestureDetector gesture={panGesture}> 
-            <Animated.View style={[styles.background, animatedStyle]}>
-                <Image source={require('../assets/background.png')} style={styles.background} resizeMode='repeat' />
-            </Animated.View>
-        </GestureDetector>
+        <GestureHandlerRootView  style={styles.container}>
+            <GestureDetector gesture={panGesture}> 
+                <Animated.View style={[styles.background, animatedStyle]}>
+                    <Image source={require('../assets/background.png')} resizeMode='repeat' />
+                </Animated.View>
+            </GestureDetector>
+        </GestureHandlerRootView>
     )
 };
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     background: {
+        ...StyleSheet.absoluteFillObject,
         width: '100%',
         height: '100%',
     },
