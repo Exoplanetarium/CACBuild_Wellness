@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, url_for
 from flask_cors import CORS
 import torchaudio
 from audiocraft.models import MusicGen
@@ -15,10 +15,10 @@ def generate_music():
     model.set_generation_params(duration=10)
     wav = model.generate(descriptions)
 
-    file_path = "output.wav"
+    file_path = os.path.join('static', 'output.wav')
     torchaudio.save(file_path, wav, 16000)
     
-    return send_file(file_path, as_attachment=True)
+    return jsonify({'file_url': url_for('static', filename='output.wav', _external=True)})
 
 if __name__ == '__main__':
     app.run(debug=True)
