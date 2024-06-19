@@ -14,6 +14,9 @@ def generate_music():
     model = MusicGen.get_pretrained('facebook/musicgen-medium')
     model.set_generation_params(duration=10)
     wav = model.generate(descriptions)
+    
+    # Reshape the tensor to be 2D
+    wav = wav.squeeze(0)  # Remove the batch dimension
 
     file_path = os.path.join('static', 'output.wav')
     torchaudio.save(file_path, wav, 16000)

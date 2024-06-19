@@ -1,6 +1,5 @@
 import { Button, StyleSheet, Text, View, Image } from 'react-native';
-import Animated from 'react-native-reanimated';
-import { useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
 import { GestureDetector, Gesture, GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function PanBackground() {
@@ -27,13 +26,13 @@ export default function PanBackground() {
     }));
     
     return (
-        <GestureHandlerRootView  style={styles.container}>
-            <GestureDetector gesture={panGesture}> 
+        <GestureDetector gesture={panGesture} > 
+            <View style={styles.container}>
                 <Animated.View style={[styles.background, animatedStyle]}>
-                    <Image source={require('../assets/background.png')} resizeMode='repeat' />
+                    <Image source={require('../assets/background.png')} />
                 </Animated.View>
-            </GestureDetector>
-        </GestureHandlerRootView>
+            </View>
+        </GestureDetector>
     )
 };
 
@@ -42,9 +41,9 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: '#131122',
     },
     background: {
-        ...StyleSheet.absoluteFillObject,
         width: '100%',
         height: '100%',
     },
