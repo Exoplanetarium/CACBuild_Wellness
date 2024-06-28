@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withRepeat, withSequence } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
 
@@ -14,8 +13,8 @@ const FeelingsCard = ({ onButtonPress }) => {
 
     hoverAnim.value = withRepeat(
       withSequence(
-        withTiming(-7, { duration: 1000 }),
-        withTiming(7, { duration: 1000 })
+        withTiming(-3, { duration: 1000 }),
+        withTiming(3, { duration: 1000 })
       ),
       -1,
       true
@@ -36,25 +35,31 @@ const FeelingsCard = ({ onButtonPress }) => {
         <Text style={styles.question}>How are you feeling right now?</Text>
         <View style={styles.buttonsContainer}>
           <Animated.View style={buttonAnimatedStyle}>
-            <TouchableOpacity 
-              style={{backgroundColor: '#f68b51', ...styles.button}}
-              onPress={onButtonPress}>
-                <Text style={styles.buttonText}>Great</Text>
+            <TouchableOpacity
+              style={{ backgroundColor: '#f68b51', ...styles.button }}
+              onPress={() => onButtonPress('theme1')}>
+              <Text style={styles.buttonText}>Great</Text>
             </TouchableOpacity>
           </Animated.View>
           <Animated.View style={buttonAnimatedStyle}>
-            <TouchableOpacity style={{backgroundColor: '#c1c11c', ...styles.button}} onPress={onButtonPress}>
-                <Text style={styles.buttonText}>Good</Text>
+            <TouchableOpacity
+              style={{ backgroundColor: '#c1c11c', ...styles.button }}
+              onPress={() => onButtonPress('theme2')}>
+              <Text style={styles.buttonText}>Good</Text>
             </TouchableOpacity>
           </Animated.View>
           <Animated.View style={buttonAnimatedStyle}>
-            <TouchableOpacity style={{backgroundColor: '#349d80', ...styles.button}} onPress={onButtonPress}>
-                <Text style={styles.buttonText}>Okay</Text>
+            <TouchableOpacity
+              style={{ backgroundColor: '#349d80', ...styles.button }}
+              onPress={() => onButtonPress('theme3')}>
+              <Text style={styles.buttonText}>Okay</Text>
             </TouchableOpacity>
           </Animated.View>
           <Animated.View style={buttonAnimatedStyle}>
-            <TouchableOpacity style={{backgroundColor: '#344C64', ...styles.button}} onPress={onButtonPress}>
-                <Text style={styles.buttonText}>Bad</Text>
+            <TouchableOpacity
+              style={{ backgroundColor: '#344C64', ...styles.button }}
+              onPress={() => onButtonPress('theme4')}>
+              <Text style={styles.buttonText}>Bad</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
@@ -68,7 +73,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#131122',
+    backgroundColor: '#d7eaff',
   },
   card: {
     width: width * 0.8,

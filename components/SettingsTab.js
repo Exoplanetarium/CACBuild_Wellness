@@ -1,22 +1,32 @@
-import { Button, StyleSheet, Text, View, Image } from 'react-native';
+import React from 'react';
+import { View, Button, StyleSheet } from 'react-native';
 
-export default function SettingsTab() {
-    return (
-        <View style={styles.container}>
-        <Text style={styles.text}>Settings def</Text>
-        </View>
-    );
-}
+const Settings = () => {
+  const generateMusic = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/generate-music', {
+        method: 'POST',
+      });
+      const data = await response.json();
+      console.log('Music generated:', data);
+    } catch (error) {
+      console.error('Error generating music:', error);
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Button title="Generate Music" onPress={generateMusic} />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#131122',
-    },
-    text: {
-        color: '#fff',
-        fontSize: 20,
-    },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
+
+export default Settings;

@@ -3,17 +3,21 @@ import { createMaterialBottomTabNavigator } from '@react-navigation/material-bot
 import PanBackground from './PanBackground'
 import SettingsTab from './SettingsTab';
 import MusicTab from './MusicTab';
+import { useTheme } from 'react-native-paper';
 
 const Tab = createMaterialBottomTabNavigator();
 
 export default function BottomNav() {
+
+  const theme = useTheme();
+
   return (
     <Tab.Navigator
       initialRouteName="Home"
-      activeColor="#f0edf6"
-      inactiveColor="#3e2465"
-      barStyle={{ backgroundColor: '#694fad', width: '100%' }}
-      
+      activeColor={theme.colors.primary}
+      inactiveColor={theme.colors.primary}
+      barStyle={{ backgroundColor: theme.colors.primaryContainer }}
+      activeIndicatorStyle={{ backgroundColor: theme.colors.secondary }}
     >
       <Tab.Screen name="Home" component={PanBackground} />
       <Tab.Screen name="Music" component={MusicTab} />

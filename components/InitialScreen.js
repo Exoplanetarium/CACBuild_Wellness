@@ -3,11 +3,13 @@ import { View, StyleSheet } from 'react-native';
 import FeelingsCard from './FeelingsCard';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
 
-const InitialScreen = ({ navigation }) => {
+const InitialScreen = ({ navigation, changeTheme }) => {
   const [showCard, setShowCard] = useState(true);
   const opacity = useSharedValue(1);
 
-  const handleButtonPress = () => {
+  const handleButtonPress = (theme) => {
+    console.log(`Button pressed, changing to theme: ${theme}`);
+    changeTheme(theme);
     opacity.value = withTiming(0, { duration: 1000 }, (finished) => {
       if (finished) {
         runOnJS(setShowCard)(false);
@@ -36,7 +38,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#131122',
+    backgroundColor: '#d7eaff',
   },
   cardContainer: {
     flex: 1,
