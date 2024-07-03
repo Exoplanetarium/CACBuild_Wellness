@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import Slider from '@react-native-community/slider';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming, Easing, runOnJS } from 'react-native-reanimated';
-import { Provider, useTheme } from 'react-native-paper';
+import { useTheme } from 'react-native-paper';
 
 const { width } = Dimensions.get('window');
 

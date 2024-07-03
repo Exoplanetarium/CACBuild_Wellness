@@ -4,7 +4,6 @@ import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
 import { useTheme } from 'react-native-paper';
 import { Audio } from 'expo-av';
-import { Waveform } from '@simform_solutions/react-native-audio-waveform';
 
 const MusicGenerator = ({ prompt, instrumental, trigger, onGenerated }) => {
     const theme = useTheme();
@@ -150,27 +149,12 @@ const MusicGenerator = ({ prompt, instrumental, trigger, onGenerated }) => {
         <View style={styles.container}>
             <Text style={[styles.status, { color: theme.colors.onPrimaryContainer }]}>{status}</Text>
             {loading && <ActivityIndicator size="large" color={theme.colors.primary} />}
-            <Waveform
-                mode="static"
-                ref={ref}
-                path="" // Empty path to render an empty waveform
-                candleSpace={2}
-                candleWidth={4}
-                scrubColor={theme.colors.primary}
-                onPlayerStateChange={(playerState) => {
-                    console.log(playerState);
-                    setPlayerState(playerState);
-                }}
-                onPanStateChange={(isMoving) => {
-                    console.log(isMoving);
-                    setIsMoving(isMoving);
-                }}
-            />
-            {/* <FlatList
+            
+            <FlatList
                 data={files}
                 keyExtractor={(item) => item}
                 renderItem={renderItem}
-            /> */}
+            />
             {sound && (
                 <TouchableOpacity style={[styles.stopButton, { backgroundColor: theme.colors.error }]} onPress={stopSound}>
                     <Text style={[styles.stopButtonText, { color: theme.colors.onError }]}>Stop</Text>

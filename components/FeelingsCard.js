@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#d7eaff',
   },
   card: {
-    width: width * 0.8,
+    width: width * 0.9,
     padding: 20,
     backgroundColor: '#f8f8f8',
     borderRadius: 10,
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#ffffff',
-    fontSize: 16,
+    fontSize: 14,
   },
 });
 

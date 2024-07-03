@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Touchable } from 'react-native';
 import axios from 'axios';
 import { Audio } from 'expo-av';
@@ -9,11 +9,10 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomSlider from './CustomSlider';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import MusicGenerator from '../backend/Generation'
-
-//! TESTING REMOVE LATER
-import { Waveform } from '@simform_solutions/react-native-audio-waveform';
+import * as FileSystem from 'expo-file-system';
 
 
+ 
 const genres = ['pop', 'rock', 'jazz', 'classical', 'hip-hop', 'electronic', 'country', 'reggae'];
 
 export default function MusicTab() {
@@ -26,11 +25,26 @@ export default function MusicTab() {
   const [triggerGeneration, setTriggerGeneration] = useState(false);
   const [showCard, setShowCard] = useState(true);
 
-  //! TESTING REMOVE LATER
-  const ref = useRef(null);
-  const [playerState, setPlayerState] = useState(null);
-  const [isMoving, setIsMoving] = useState(false);
-  const filePath = '../backend/static/586fc4d5-17cd-4944-a91c-5bfc168acc38.mp3'
+  const filePath = 'https://cdn1.suno.ai/813bc8e0-9124-4143-a0b6-ebd6ff1221fb.mp3';
+  console.log('File Path:', filePath);
+
+  useEffect(() => {
+      const errorListener = (error) => {
+        console.error('Waveform error:', error);
+      };
+
+      const refCurrent = ref.current;
+
+      if (refCurrent) {
+        refCurrent.addEventListener('error', errorListener);
+      }
+
+      return () => {
+        if (refCurrent) {
+          refCurrent.removeEventListener('error', errorListener);
+        }
+      };
+  }, []);
 
   const handleCheckboxPress = useCallback((genre) => {
     setCheckedGenres((prevCheckedGenres) => ({
@@ -131,23 +145,7 @@ export default function MusicTab() {
         </Card.Actions>
       </Card>
       ) : (
-        <Waveform
-          mode="static"
-          ref={ref}
-          path={filePath}
-          candleSpace={2}
-          candleWidth={4}
-          scrubColor={theme.colors.primary}
-          onPlayerStateChange={() => {
-            console.log(playerState);
-            setPlayerState(playerState);
-          }}
-          onPanStateChange={() => {
-            console.log(isMoving);
-            setIsMoving(isMoving);
-          }}
-          onError={(error) => console.error('Waveform error:', error)}
-        />
+        <Text>1</Text>
         // <MusicGenerator
         //   prompt={generatePrompt()}
         //   instrumental={!checkedLyrics}
