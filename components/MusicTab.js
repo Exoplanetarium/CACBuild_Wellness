@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Touchable } from 'react-native';
+import { View, Text, StyleSheet, Touchable, Dimensions } from 'react-native';
 import axios from 'axios';
 import { Audio } from 'expo-av';
 import { useTheme, RadioButton, Checkbox, Provider, Card, Button, } from 'react-native-paper';
@@ -11,8 +11,8 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import MusicGenerator from '../backend/Generation'
 import * as FileSystem from 'expo-file-system';
 
-
- 
+// Get screen dimensions
+const { width } = Dimensions.get('window');
 const genres = ['pop', 'rock', 'jazz', 'classical', 'hip-hop', 'electronic', 'country', 'reggae'];
 
 export default function MusicTab() {
@@ -24,27 +24,6 @@ export default function MusicTab() {
   const [value, setValue] = useState(0);
   const [triggerGeneration, setTriggerGeneration] = useState(false);
   const [showCard, setShowCard] = useState(true);
-
-  const filePath = 'https://cdn1.suno.ai/813bc8e0-9124-4143-a0b6-ebd6ff1221fb.mp3';
-  console.log('File Path:', filePath);
-
-  useEffect(() => {
-      const errorListener = (error) => {
-        console.error('Waveform error:', error);
-      };
-
-      const refCurrent = ref.current;
-
-      if (refCurrent) {
-        refCurrent.addEventListener('error', errorListener);
-      }
-
-      return () => {
-        if (refCurrent) {
-          refCurrent.removeEventListener('error', errorListener);
-        }
-      };
-  }, []);
 
   const handleCheckboxPress = useCallback((genre) => {
     setCheckedGenres((prevCheckedGenres) => ({
@@ -71,38 +50,60 @@ export default function MusicTab() {
     setCheckedLyrics(!checkedLyrics);
   }
 
+  const handleSurpriseMe = () => {
+    // Randomly set checkedLyrics
+    setCheckedLyrics(Math.random() < 0.5);
+  
+    // Randomly set value (tempo) between 40 and 150, adhering to a step of 5
+    const minTempo = 40;
+    const maxTempo = 150;
+    const step = 5;
+    const randomTempo = Math.round((Math.random() * (maxTempo - minTempo) + minTempo) / step) * step;
+    setValue(randomTempo);
+  
+    // Randomly set moodPercent between 0 and 100
+    const randomMoodPercent = Math.floor(Math.random() * 101);
+    setMoodPercent(randomMoodPercent);
+
+    // Randomly select a genre and ensure it's checked
+    const randomGenreIndex = Math.floor(Math.random() * genres.length);
+    const randomGenre = genres[randomGenreIndex];
+    setCheckedGenres({ [randomGenre]: true });
+  };
+
   
 
   return (
     <View style={{backgroundColor: theme.colors.background, ...styles.container}}>
       {showCard ? (
-      <Card style={{backgroundColor: theme.colors.primaryContainer}} >
+      <Card style={{backgroundColor: theme.colors.primaryContainer, ...styles.card}} >
         <Card.Title title="Shape your music" titleStyle={{color: theme.colors.onPrimaryContainer, fontWeight: 'bold'}} titleMaxFontSizeMultiplier={4}/>
         <Card.Actions>
           <Card.Content style={{marginLeft: -30, marginRight: -30}}>
             {/* Tempo */}
-            <Text style={{color: theme.colors.onPrimaryContainer, textAlign: 'center'}}>Tempo</Text>
-            <CustomSlider
-              min={40}
-              max={150}
-              step={5}
-              value={value}
-              onValueChange={setValue}
-              width={200}
-              height={40}
-              
-            />
+            <View style={{marginLeft: 0}}>
+              <Text style={{color: theme.colors.onPrimaryContainer, textAlign: 'center'}}>Tempo</Text>
+              <CustomSlider
+                min={40}
+                max={150}
+                step={5}
+                value={value}
+                onValueChange={setValue}
+                width={width*0.4}
+                height={40}
+                
+              />
+            </View>
             {/* Lyrics */}
-            <TouchableOpacity style={{flexDirection: 'row',justifyContent: 'space-around',alignItems: 'center', width: 240, }} onPress={handleCheckboxLyrics}>
-              <Text style={{color: theme.colors.onPrimaryContainer, textAlign: 'center'}}>Lyrics?</Text>
-              <Checkbox value="lyrics" status={checkedLyrics ? 'checked' : 'unchecked'} style={{justifyContent: 'center', width: 200}} theme={theme}/>
+            <TouchableOpacity style={{flexDirection: 'row',justifyContent: 'center',alignItems: 'center', width: width*0.4, }} onPress={handleCheckboxLyrics}>
+              <Text style={{color: theme.colors.onPrimaryContainer, textAlign: 'center', marginRight: 20}}>Lyrics?</Text>
+              <Checkbox value="lyrics" status={checkedLyrics ? 'checked' : 'unchecked'} style={{marginLeft: 20}} theme={theme}/>
             </TouchableOpacity>
-   
           </Card.Content>
           
           {/* Genre */}
           <Card.Content>
-            <Text style={{ color: theme.colors.onPrimaryContainer, textAlign: 'center' }}>Genres</Text>
+            <Text style={{ color: theme.colors.onPrimaryContainer, textAlign: 'center', marginTop: -10}}>Genres</Text>
             {genres.map((genre) => (
               <Checkbox.Item
                 key={genre}
@@ -121,14 +122,17 @@ export default function MusicTab() {
         </Card.Actions>
         {/* Mood */}
         <Card.Content>
-          <Text style={{color: theme.colors.onPrimaryContainer, marginTop: 10}}>                          Calm                                                                Upbeat</Text>
+          <View>
+          <Text style={{color: theme.colors.onPrimaryContainer, marginTop: 10, marginLeft: width*0.25}}>Calm</Text>
+          <Text style={{color: theme.colors.onPrimaryContainer, marginTop: -20, marginLeft: width*0.72}}>Upbeat</Text>
+          </View>
         </Card.Content>
         <Card.Actions style={{marginTop: -15}}>
           <Card.Content>
             <Text style={{color: theme.colors.onPrimaryContainer}}>Mood</Text>        
           </Card.Content>
           <Slider
-            style={{width: 300, height: 40}}
+            style={{width: width*0.6, height: 40}}
             minimumTrackTintColor={theme.colors.primary}
             maximumTrackTintColor={theme.colors.primary}
             thumbTintColor={theme.colors.primary}
@@ -140,18 +144,17 @@ export default function MusicTab() {
         </Card.Actions>
 
         <Card.Actions>
-          <Button style={{borderRadius: 5}}>Surprise Me!</Button>
+          <Button style={{borderRadius: 5}} onPress={handleSurpriseMe}>Surprise Me!</Button>
           <Button style={{borderRadius: 5}} onPress={handleGenerateMusic}>Generate Music</Button>
         </Card.Actions>
       </Card>
       ) : (
-        <Text>1</Text>
-        // <MusicGenerator
-        //   prompt={generatePrompt()}
-        //   instrumental={!checkedLyrics}
-        //   trigger={triggerGeneration}
-        //   onGenerated={() => setTriggerGeneration(false)}
-        // />
+        <MusicGenerator
+          prompt={generatePrompt()}
+          instrumental={!checkedLyrics}
+          trigger={triggerGeneration}
+          onGenerated={() => setTriggerGeneration(false)}
+        />
       )}
     </View>
   );
@@ -166,6 +169,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   text: {
-    fontSize: 18,
+    fontSize: 14,
   },
+  card: {
+    width: width * 0.9,
+  }
 });

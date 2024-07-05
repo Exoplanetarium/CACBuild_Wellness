@@ -2,18 +2,40 @@ import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, ActivityIndicator, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
-import { useTheme } from 'react-native-paper';
-import { Audio } from 'expo-av';
+import { useTheme, Button } from 'react-native-paper';
+import Slider from '@react-native-community/slider';
+import TrackPlayer, { usePlaybackState, Capability, useProgress, State } from 'react-native-track-player';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+const setupTrackPlayer = async () => {
+    console.log('Setting up player...');
+    await TrackPlayer.setupPlayer();
+    await TrackPlayer.updateOptions({
+        stopWithApp: true,
+        capabilities: [
+            Capability.Play,
+            Capability.Pause,
+            Capability.SkipToNext,
+            Capability.SkipToPrevious,
+            Capability.Stop,
+            Capability.SeekTo,
+        ],
+        compactCapabilities: [Capability.Play, Capability.Pause],
+    });
+};
 
 const MusicGenerator = ({ prompt, instrumental, trigger, onGenerated }) => {
     const theme = useTheme();
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState('');
     const [files, setFiles] = useState([]);
-    const [sound, setSound] = useState(null);
-    const [playerState, setPlayerState] = useState(null);
-    const [isMoving, setIsMoving] = useState(false);
-    const ref = useRef(null);
+    const playbackState = usePlaybackState();
+    const { position, duration } = useProgress();
+    
+    useEffect(() => {
+        setupTrackPlayer();
+        return () => TrackPlayer.reset();
+    }, []);
 
     useEffect(() => {
         if (trigger) {
@@ -92,84 +114,107 @@ const MusicGenerator = ({ prompt, instrumental, trigger, onGenerated }) => {
             const dirUri = `${FileSystem.documentDirectory}static/`;
             await FileSystem.makeDirectoryAsync(dirUri, { intermediates: true });
             const fileUri = `${dirUri}${audioId}.mp3`;
-            await FileSystem.downloadAsync(audioUrl, fileUri);
+            console.log(`Attempting to download and save file: ${fileUri}`);
+            const downloadResult = await FileSystem.downloadAsync(audioUrl, fileUri);
+            console.log(`Download result: ${JSON.stringify(downloadResult)}`);
             setFiles(prevFiles => [...prevFiles, `${audioId}.mp3`]);
             setStatus(`Audio file saved: ${audioId}.mp3`);
             console.log(`File saved at: ${fileUri}`);
+
+            // Add track to TrackPlayer queue
+            await TrackPlayer.add({
+                id: audioId,
+                url: fileUri,
+                title: "Generated Music",
+                artist: "Suno API",
+            });
+            console.log(`Track added to player: ${audioId}`);
         } catch (error) {
+            console.error(`Error downloading or saving audio file: ${error}`);
             setStatus(`Error downloading audio file: ${error}`);
         } finally {
             onGenerated();
         }
     };
 
-    const playSound = async (fileName) => {
-        const fileUri = `${FileSystem.documentDirectory}static/${fileName}`;
+    const togglePlayback = async () => {
+        // Convert the playbackState object to a string for logging
+        console.log(`Current playback state: ${JSON.stringify(playbackState)}`);
+      
         try {
-            if (sound) await sound.unloadAsync();
-            const { sound: newSound } = await Audio.Sound.createAsync({ uri: fileUri });
-            setSound(newSound);
-            await newSound.playAsync();
+          // Assuming playbackState.state holds the actual state value you're interested in
+          const stateValue = playbackState.state;
+      
+          // Check if the player is in a state that indicates it's ready to start playing
+          if (stateValue === State.Paused || stateValue === State.Stopped || stateValue === State.Ready || stateValue === State.None) {
+            console.log('Attempting to play...');
+            await TrackPlayer.play();
+          } else if (stateValue === State.Playing) {
+            console.log('Attempting to pause...');
+            await TrackPlayer.pause();
+          }
         } catch (error) {
-            console.error('Error playing sound:', error);
+          Alert.alert('Error', 'Failed to toggle playback: ' + error.message);
+        }
+      };
+    
+      const onSliderValueChange = async (value) => {
+        try {
+          await TrackPlayer.seekTo(value);
+        } catch (error) {
+          Alert.alert('Error', 'Failed to seek track: ' + error.message);
         }
     };
 
-    const stopSound = async () => {
-        if (sound) {
-            try {
-                await sound.stopAsync();
-                await sound.unloadAsync();
-            } catch (error) {
-                console.error('Error stopping sound:', error);
-            } finally {
-                setSound(null);
-            }
+    const skipToNext = async () => {
+        try {
+          await TrackPlayer.skipToNext();
+        } catch (error) {
+          console.log(error);
         }
-    };
-
-    useEffect(() => {
-        return sound ? () => { sound.unloadAsync(); } : undefined;
-    }, [sound]);
-
-    const renderItem = ({ item }) => {
-        const filePath = `${FileSystem.documentDirectory}static/${item}`;
-        console.log(`Rendering waveform for: ${filePath}`);
-        return (
-            <View style={styles.waveformContainer}>
-                
-                <TouchableOpacity onPress={() => playSound(item)} style={styles.playButton}>
-                    <Text style={styles.playButtonText}>Play</Text>
-                </TouchableOpacity>
-            </View>
-        );
+      };
+    
+    const skipToPrevious = async () => {
+        try {
+            await TrackPlayer.skipToPrevious();
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     return (
         <View style={styles.container}>
             <Text style={[styles.status, { color: theme.colors.onPrimaryContainer }]}>{status}</Text>
-            {loading && <ActivityIndicator size="large" color={theme.colors.primary} />}
-            
-            <FlatList
-                data={files}
-                keyExtractor={(item) => item}
-                renderItem={renderItem}
-            />
-            {sound && (
-                <TouchableOpacity style={[styles.stopButton, { backgroundColor: theme.colors.error }]} onPress={stopSound}>
-                    <Text style={[styles.stopButtonText, { color: theme.colors.onError }]}>Stop</Text>
-                </TouchableOpacity>
-            )}
+            {loading && <ActivityIndicator size="large" color={theme.colors.primary} />}   
+            <View style={{backgroundColor: theme.colors.background, ...styles.container}}>
+                <Text style={{color: theme.colors.onBackground, ...styles.trackInfo}}></Text>
+                <Slider
+                style={styles.slider}
+                minimumValue={0}
+                maximumValue={duration}
+                value={position}
+                minimumTrackTintColor={theme.colors.primary}
+                maximumTrackTintColor={theme.colors.accent}
+                thumbTintColor={theme.colors.primary}
+                onSlidingComplete={onSliderValueChange}
+                />
+                <View style={styles.controls}>
+                    <Button title="skip to next" onPress={skipToNext} />
+                    <Button mode="contained" onPress={togglePlayback}>
+                        {playbackState.state === State.Playing ? 'Pause' : 'Play'}
+                    </Button>
+                    <Button icon={<Icon size={20} name="skip-previous"/>} onPress={skipToPrevious} />
+                </View>
+                <View style={styles.timeInfo}>
+                    <Text style={{color: theme.colors.onBackground}}>{new Date(position * 1000).toISOString().slice(11, 19)}</Text>
+                    <Text style={{color: theme.colors.onBackground}}>{new Date(duration * 1000).toISOString().slice(11, 19)}</Text>
+                </View>
+            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        padding: 16,
-    },
     status: {
         marginBottom: 16,
         textAlign: 'center',
@@ -197,6 +242,33 @@ const styles = StyleSheet.create({
     },
     stopButtonText: {
         textAlign: 'center',
+    },
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    trackInfo: {
+        fontSize: 18,
+        marginBottom: 20,
+    },
+    slider: {
+        width: 300,
+        height: 40,
+    },
+    controls: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        width: '60%',
+        marginTop: 20,
+    },
+    timeInfo: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: 300,
+        marginTop: 10,
+
     },
 });
 

@@ -35,7 +35,6 @@ const CustomSlider = ({ min, max, step, value, onValueChange, width, height }) =
   
 
   return (
-    <View style={styles.container}>
       <View style={styles.sliderContainer}>
         <Animated.View style={[styles.valueContainer, animatedStyle]}>
           <Text style={styles.valueLabel}>{value}</Text>
@@ -53,19 +52,16 @@ const CustomSlider = ({ min, max, step, value, onValueChange, width, height }) =
             thumbTintColor={theme.colors.primary}
         />
       </View>
-    </View>
   );
 };
 
 const styles = StyleSheet.create({
-    container: {
-      alignItems: 'center',
-      margin: 20,
-    },
     sliderContainer: {
       position: 'relative',
       width: '100%',
       alignItems: 'center',
+      marginBottom: 25,
+      marginTop: 10,
     },
     valueContainer: {
       position: 'absolute',

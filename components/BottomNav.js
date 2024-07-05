@@ -21,7 +21,7 @@ export default function BottomNav() {
       activeIndicatorStyle={{ backgroundColor: theme.colors.secondary }}
     >
       <Tab.Screen name="Home" component={PanBackground} />
-      <Tab.Screen name="Music" component={TestPlayer} />
+      <Tab.Screen name="Music" component={MusicTab} />
       <Tab.Screen name="Settings" component={SettingsTab} />
     </Tab.Navigator>
   );

@@ -84,8 +84,8 @@ const Player = () => {
   };
 
   return (
-      <View style={styles.container}>
-        <Text style={{color: theme.colors.onBackground, ...styles.trackInfo}}>Track Title - Track Artist</Text>
+      <View style={{backgroundColor: theme.colors.background, ...styles.container}}>
+        <Text style={{color: theme.colors.onBackground, ...styles.trackInfo}}></Text>
         <Slider
           style={styles.slider}
           minimumValue={0}
@@ -102,8 +102,8 @@ const Player = () => {
           </Button>
         </View>
         <View style={styles.timeInfo}>
-          <Text style={{color: '#000'}}>{new Date(position * 1000).toISOString().slice(11, 19)}</Text>
-          <Text style={{color: '#000'}}>{new Date(duration * 1000).toISOString().slice(11, 19)}</Text>
+          <Text style={{color: theme.colors.onBackground}}>{new Date(position * 1000).toISOString().slice(11, 19)}</Text>
+          <Text style={{color: theme.colors.onBackground}}>{new Date(duration * 1000).toISOString().slice(11, 19)}</Text>
         </View>
       </View>
   );
@@ -119,7 +119,6 @@ const styles = StyleSheet.create({
   trackInfo: {
     fontSize: 18,
     marginBottom: 20,
-    color: '#000000',
   },
   slider: {
     width: 300,
