@@ -1,58 +1,57 @@
 import React, { useState } from 'react';
-import { StyleSheet } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { MD3DarkTheme as DefaultTheme } from 'react-native-paper';
 import BottomNav from './components/BottomNav';
-import InitialScreen from './components/InitialScreen'; // Import the InitialScreen component
-import PanBackground from './components/PanBackground'; // Import the PanBackground component if needed
+import InitialScreen from './components/InitialScreen'; 
+import PanBackground from './components/PanBackground';
+import AuthScreen from './components/AuthScreen';
 
 const Stack = createNativeStackNavigator();
 
 const theme4 = {
   "colors": {
-    "primary": "rgb(113, 210, 255)",
-    "onPrimary": "rgb(0, 53, 71)",
-    "primaryContainer": "rgb(0, 77, 102)",
-    "onPrimaryContainer": "rgb(192, 232, 255)",
-    "secondary": "rgb(181, 202, 214)",
-    "onSecondary": "rgb(31, 51, 61)",
-    "secondaryContainer": "rgb(54, 73, 84)",
-    "onSecondaryContainer": "rgb(208, 230, 243)",
-    "tertiary": "rgb(200, 194, 234)",
-    "onTertiary": "rgb(48, 44, 76)",
-    "tertiaryContainer": "rgb(71, 67, 100)",
-    "onTertiaryContainer": "rgb(228, 223, 255)",
+    "primary": "rgb(160, 202, 255)",
+    "onPrimary": "rgb(0, 50, 89)",
+    "primaryContainer": "rgb(0, 73, 126)",
+    "onPrimaryContainer": "rgb(210, 228, 255)",
+    "secondary": "rgb(187, 199, 219)",
+    "onSecondary": "rgb(37, 49, 65)",
+    "secondaryContainer": "rgb(60, 72, 88)",
+    "onSecondaryContainer": "rgb(215, 227, 248)",
+    "tertiary": "rgb(215, 190, 228)",
+    "onTertiary": "rgb(59, 41, 71)",
+    "tertiaryContainer": "rgb(83, 63, 95)",
+    "onTertiaryContainer": "rgb(243, 218, 255)",
     "error": "rgb(255, 180, 171)",
     "onError": "rgb(105, 0, 5)",
     "errorContainer": "rgb(147, 0, 10)",
     "onErrorContainer": "rgb(255, 180, 171)",
-    "background": "rgb(25, 28, 30)",
-    "onBackground": "rgb(225, 226, 229)",
-    "surface": "rgb(25, 28, 30)",
-    "onSurface": "rgb(225, 226, 229)",
-    "surfaceVariant": "rgb(64, 72, 76)",
-    "onSurfaceVariant": "rgb(192, 199, 205)",
-    "outline": "rgb(138, 146, 151)",
-    "outlineVariant": "rgb(64, 72, 76)",
+    "background": "rgb(26, 28, 30)",
+    "onBackground": "rgb(226, 226, 230)",
+    "surface": "rgb(26, 28, 30)",
+    "onSurface": "rgb(226, 226, 230)",
+    "surfaceVariant": "rgb(67, 71, 78)",
+    "onSurfaceVariant": "rgb(195, 198, 207)",
+    "outline": "rgb(141, 145, 153)",
+    "outlineVariant": "rgb(67, 71, 78)",
     "shadow": "rgb(0, 0, 0)",
     "scrim": "rgb(0, 0, 0)",
-    "inverseSurface": "rgb(225, 226, 229)",
-    "inverseOnSurface": "rgb(46, 49, 51)",
-    "inversePrimary": "rgb(0, 102, 134)",
+    "inverseSurface": "rgb(226, 226, 230)",
+    "inverseOnSurface": "rgb(47, 48, 51)",
+    "inversePrimary": "rgb(9, 97, 164)",
     "elevation": {
       "level0": "transparent",
-      "level1": "rgb(29, 37, 41)",
-      "level2": "rgb(32, 43, 48)",
-      "level3": "rgb(35, 48, 55)",
-      "level4": "rgb(36, 50, 57)",
-      "level5": "rgb(37, 54, 62)"
+      "level1": "rgb(33, 37, 41)",
+      "level2": "rgb(37, 42, 48)",
+      "level3": "rgb(41, 47, 55)",
+      "level4": "rgb(42, 49, 57)",
+      "level5": "rgb(45, 52, 62)"
     },
-    "surfaceDisabled": "rgba(225, 226, 229, 0.12)",
-    "onSurfaceDisabled": "rgba(225, 226, 229, 0.38)",
-    "backdrop": "rgba(42, 49, 54, 0.4)"
+    "surfaceDisabled": "rgba(226, 226, 230, 0.12)",
+    "onSurfaceDisabled": "rgba(226, 226, 230, 0.38)",
+    "backdrop": "rgba(44, 49, 55, 0.4)"
   }
 };
 
@@ -191,8 +190,10 @@ const theme1 = {
   }
 };
 
+
+
 export default function App() {
-  const [currentTheme, setCurrentTheme] = useState(theme1);
+  const [currentTheme, setCurrentTheme] = useState(theme4);
 
   const changeTheme = (theme) => {
     console.log(`Changing theme to: ${theme}`);
@@ -220,6 +221,7 @@ export default function App() {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <NavigationContainer>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="Auth" component={AuthScreen} />
               <Stack.Screen name="Initial">
                 {props => <InitialScreen {...props} changeTheme={changeTheme} />}
               </Stack.Screen>
@@ -231,3 +233,9 @@ export default function App() {
   );
 }
 
+import firebase from '@react-native-firebase/app';
+
+// Initialize Firebase
+if (!firebase.apps.length) {
+  firebase.initializeApp();
+}

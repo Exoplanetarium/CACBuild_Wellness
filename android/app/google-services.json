@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "103704653066",
+    "project_id": "buddy-2a180",
+    "storage_bucket": "buddy-2a180.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:103704653066:android:0e121dcd2d33cbf8e55ef3",
+        "android_client_info": {
+          "package_name": "com.anonymous.CACBuild_wellness"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "103704653066-n9n3c7i4rk63ii1vrmq5al9u3q22136j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.anonymous.CACBuild_wellness",
+            "certificate_hash": "162562e1bdaa6fcaaad0888b9f97337d547bed71"
+          }
+        },
+        {
+          "client_id": "103704653066-0h2jfsl9fnf6dkt0t8d6gbc5ocolhorb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCDx10-3zlLLtskj2RZJTslvTvwt0e9X4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "103704653066-0h2jfsl9fnf6dkt0t8d6gbc5ocolhorb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

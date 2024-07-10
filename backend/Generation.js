@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, ActivityIndicator, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
-import { useTheme, Button } from 'react-native-paper';
+import { useTheme, Button, IconButton } from 'react-native-paper';
 import Slider from '@react-native-community/slider';
 import TrackPlayer, { usePlaybackState, Capability, useProgress, State } from 'react-native-track-player';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -34,7 +34,6 @@ const MusicGenerator = ({ prompt, instrumental, trigger, onGenerated }) => {
     
     useEffect(() => {
         setupTrackPlayer();
-        return () => TrackPlayer.reset();
     }, []);
 
     useEffect(() => {
@@ -78,7 +77,17 @@ const MusicGenerator = ({ prompt, instrumental, trigger, onGenerated }) => {
                 setStatus('Failed to submit generation request.');
             }
         } catch (error) {
-            console.error('Error generating music:', error.response?.data || error.message);
+            console.error('Error generating music:', error);
+            // Enhanced logging
+            if (error.response) {
+                console.error('Error status:', error.response.status);
+                console.error('Error headers:', error.response.headers);
+                console.error('Error data:', error.response.data);
+            } else if (error.request) {
+                console.error('Error request:', error.request);
+            } else {
+                console.error('Error message:', error.message);
+            }
             setStatus(`Error generating music: ${error.response?.data?.message || error.message}`);
         } finally {
             setLoading(false);
@@ -137,8 +146,21 @@ const MusicGenerator = ({ prompt, instrumental, trigger, onGenerated }) => {
         }
     };
 
+    const logTrackPlayerQueue = async () => {
+        try {
+            const queue = await TrackPlayer.getQueue();
+            console.log('Current TrackPlayer Queue:');
+            queue.forEach((track, index) => {
+                console.log(`Track ${index + 1}:`, JSON.stringify(track));
+            });
+        } catch (error) {
+            console.error('Error fetching TrackPlayer queue:', error);
+        }
+    };
+
     const togglePlayback = async () => {
         // Convert the playbackState object to a string for logging
+        logTrackPlayerQueue();
         console.log(`Current playback state: ${JSON.stringify(playbackState)}`);
       
         try {
@@ -199,11 +221,13 @@ const MusicGenerator = ({ prompt, instrumental, trigger, onGenerated }) => {
                 onSlidingComplete={onSliderValueChange}
                 />
                 <View style={styles.controls}>
-                    <Button title="skip to next" onPress={skipToNext} />
-                    <Button mode="contained" onPress={togglePlayback}>
+                    <IconButton icon='skip-previous' iconColor={theme.colors.onBackground} size={25} onPress={skipToPrevious} />
+                    <View>
+                    <Button mode="contained" onPress={togglePlayback}>  
                         {playbackState.state === State.Playing ? 'Pause' : 'Play'}
                     </Button>
-                    <Button icon={<Icon size={20} name="skip-previous"/>} onPress={skipToPrevious} />
+                    </View>
+                    <IconButton icon='skip-next' iconColor={theme.colors.onBackground} size={25} onPress={skipToNext} />
                 </View>
                 <View style={styles.timeInfo}>
                     <Text style={{color: theme.colors.onBackground}}>{new Date(position * 1000).toISOString().slice(11, 19)}</Text>
@@ -260,6 +284,7 @@ const styles = StyleSheet.create({
     controls: {
         flexDirection: 'row',
         justifyContent: 'space-around',
+        alignItems: 'center',
         width: '60%',
         marginTop: 20,
     },

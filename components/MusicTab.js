@@ -9,7 +9,6 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomSlider from './CustomSlider';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import MusicGenerator from '../backend/Generation'
-import * as FileSystem from 'expo-file-system';
 
 // Get screen dimensions
 const { width } = Dimensions.get('window');
@@ -34,16 +33,32 @@ export default function MusicTab() {
 
   const genreList = Object.keys(checkedGenres)
     .filter((genre) => checkedGenres[genre])
-    .join(', ');
+    .join(' ');
+
+  const convertMood = (moodPercent) => {
+    if (moodPercent < 25) {
+      return 'calm melodious';
+    } else if (moodPercent < 50) {
+      return 'chill comfortable';
+    } else if (moodPercent < 75) {
+      return 'upbeat lively';
+    } else {
+      return 'explosive energetic';
+    }
+  };
 
   const generatePrompt = () => {
-    return `Generate music with tempo:${value}, genres:${genreList},mood (from 0 is most calm to 100 is most upbeat):${moodPercent}. Follow these instructions closely`;
+    return `Generate music with tempo:${value}bpm,genres:${genreList},mood:${convertMood(moodPercent)}.Think creatively & dont be repetitive`;
   };
 
   const handleGenerateMusic = () => {
     setTriggerGeneration(true);
     setShowCard(false);
   };
+
+  const handleGenerator = () => {
+    setShowCard(true);
+  }
 
 
   const handleCheckboxLyrics = () => {
@@ -124,7 +139,7 @@ export default function MusicTab() {
         <Card.Content>
           <View>
           <Text style={{color: theme.colors.onPrimaryContainer, marginTop: 10, marginLeft: width*0.25}}>Calm</Text>
-          <Text style={{color: theme.colors.onPrimaryContainer, marginTop: -20, marginLeft: width*0.72}}>Upbeat</Text>
+          <Text style={{color: theme.colors.onPrimaryContainer, marginTop: -20, marginLeft: width*0.68}}>Upbeat</Text>
           </View>
         </Card.Content>
         <Card.Actions style={{marginTop: -15}}>
@@ -143,18 +158,21 @@ export default function MusicTab() {
           />
         </Card.Actions>
 
-        <Card.Actions>
+        <Card.Actions style={{marginBottom: 4, marginRight: 3}}>
           <Button style={{borderRadius: 5}} onPress={handleSurpriseMe}>Surprise Me!</Button>
           <Button style={{borderRadius: 5}} onPress={handleGenerateMusic}>Generate Music</Button>
         </Card.Actions>
       </Card>
       ) : (
+        <>
         <MusicGenerator
           prompt={generatePrompt()}
           instrumental={!checkedLyrics}
           trigger={triggerGeneration}
           onGenerated={() => setTriggerGeneration(false)}
         />
+        <Button style={{borderRadius: 5}} onPress={handleGenerator}>Return to Generator</Button>
+        </>
       )}
     </View>
   );
