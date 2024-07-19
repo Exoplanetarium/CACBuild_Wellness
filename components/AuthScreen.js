@@ -12,7 +12,7 @@ const AuthScreen = ({ navigation }) => {
   const handleSignUp = async () => {
     const result = await signUp(email, password);
     if (result.success) {
-      navigation.replace('Initial');
+      navigation.replace('Main');
     } else {
       // Handle sign up failure (e.g., show an error message)
       console.error(result.error);
@@ -23,7 +23,7 @@ const AuthScreen = ({ navigation }) => {
   const handleLogIn = async () => {
     const result = await logIn(email, password);
     if (result.success) {
-      navigation.replace('Initial');
+      navigation.replace('Main');
     } else {
       // Handle log in failure (e.g., show an error message)
       console.error(result.error);

@@ -1,11 +1,7 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, Touchable, Dimensions } from 'react-native';
-import axios from 'axios';
-import { Audio } from 'expo-av';
 import { useTheme, RadioButton, Checkbox, Provider, Card, Button, } from 'react-native-paper';
-import DropDownPicker from 'react-native-dropdown-picker';
 import Slider from '@react-native-community/slider';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomSlider from './CustomSlider';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import MusicGenerator from '../backend/Generation'
@@ -86,10 +82,8 @@ export default function MusicTab() {
     setCheckedGenres({ [randomGenre]: true });
   };
 
-  
-
   return (
-    <View style={{backgroundColor: theme.colors.background, ...styles.container}}>
+    <View style={{backgroundColor: theme.colors.onSecondary, ...styles.container}}>
       {showCard ? (
       <Card style={{backgroundColor: theme.colors.primaryContainer, ...styles.card}} >
         <Card.Title title="Shape your music" titleStyle={{color: theme.colors.onPrimaryContainer, fontWeight: 'bold'}} titleMaxFontSizeMultiplier={4}/>
@@ -170,8 +164,9 @@ export default function MusicTab() {
           instrumental={!checkedLyrics}
           trigger={triggerGeneration}
           onGenerated={() => setTriggerGeneration(false)}
+          handleShowGenerator={handleGenerator}
         />
-        <Button style={{borderRadius: 5}} onPress={handleGenerator}>Return to Generator</Button>
+  
         </>
       )}
     </View>

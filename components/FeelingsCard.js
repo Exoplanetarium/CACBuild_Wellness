@@ -1,92 +1,42 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, withRepeat, withSequence } from 'react-native-reanimated';
 import { useTheme, Button } from 'react-native-paper';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const FeelingsCard = ({ onButtonPress }) => {
-  const translateY = useSharedValue(50);
-  const hoverAnim = useSharedValue(0);
   const theme = useTheme();
 
-  useEffect(() => {
-    translateY.value = withTiming(0, { duration: 1000 });
-
-    hoverAnim.value = withRepeat(
-      withSequence(
-        withTiming(-3, { duration: 1000 }),
-        withTiming(3, { duration: 1000 })
-      ),
-      -1,
-      true
-    );
-  }, [translateY, hoverAnim]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
-  }));
-
-  const buttonAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: hoverAnim.value }],
-  }));
-
   return (
-    <View style={styles.container}>
-      <Animated.View style={[{backgroundColor: theme.colors.onSecondary, ...styles.card}, animatedStyle]}>
+    <View style={styles.cardContainer}>
+      <View style={[styles.card, { backgroundColor: theme.colors.onSecondary }]}>
         <View style={styles.buttonsContainer}>
-          <Animated.View style={buttonAnimatedStyle}>
-            <Button
-              style={styles.button}
-              buttonColor='#f68b51'
-              onPress={() => onButtonPress()}
-            >
-              <Text style={styles.buttonText}>Great</Text>
-            </Button>
-          </Animated.View>
-          <Animated.View style={buttonAnimatedStyle}>
-            <Button
-              style={styles.button}
-              buttonColor='#c1c11c'
-              onPress={() => onButtonPress()}
-            >
-              <Text style={styles.buttonText}>Good</Text>
-            </Button>
-          </Animated.View>
-          <Animated.View style={buttonAnimatedStyle}>
-            <Button
-              style={styles.button}
-              buttonColor='#349d80'
-              onPress={() => onButtonPress()}
-            >
-              <Text style={styles.buttonText}>Okay</Text>
-            </Button>
-          </Animated.View>
-          <Animated.View style={buttonAnimatedStyle}>
-            <Button
-              style={styles.button}
-              buttonColor='#344C64'
-              onPress={() => onButtonPress()}>
-              <Text style={styles.buttonText}>Bad</Text>
-            </Button>
-          </Animated.View>
+          <Button style={styles.button} onPress={() => onButtonPress()} mode='contained-tonal' contentStyle={{width: 65}} compact={true}>
+            <Text style={styles.buttonText}>Great</Text>
+          </Button>
+          <Button style={styles.button} onPress={() => onButtonPress()} mode='contained-tonal' contentStyle={{width: 65}} compact={true}>
+            <Text style={styles.buttonText}>Good</Text>
+          </Button>
+          <Button style={styles.button} onPress={() => onButtonPress()} mode='contained-tonal' contentStyle={{width: 65}} compact={true}>
+            <Text style={styles.buttonText}>Okay</Text>
+          </Button>
+          <Button style={styles.button} onPress={() => onButtonPress()} mode='contained-tonal' contentStyle={{width: 65}} compact={true}>
+            <Text style={styles.buttonText}>Bad</Text>
+          </Button>
         </View>
-      </Animated.View>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    position: 'absolute', // Use absolute positioning
-    top: '50%', // Center vertically
-    left: '50%', // Center horizontally
-    transform: [{ translateX: -(width * 0.45) }, { translateY: -50 }], // Adjust based on the card size and desired position
+  cardContainer: {
+    width: '100%', // Ensure the card container takes the full width of the parent
     alignItems: 'center',
   },
   card: {
-    width: width * 0.9,
-    padding: 20,
+    width: '100%',
+    padding: 16,
     borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -99,7 +49,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   buttonText: {
-    color: 'white'
+    color: 'white',
+    fontSize: 12,
+  },
+  button: {
+    marginHorizontal: 2,
   }
 });
 

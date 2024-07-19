@@ -4,10 +4,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomNav from './components/BottomNav';
-import InitialScreen from './components/InitialScreen'; 
-import InitialBackground from './components/InitialBackground';
-import PanBackground from './components/PanBackground';
 import AuthScreen from './components/AuthScreen';
+import TextBubble from './components/TextBubble';
 
 const Stack = createNativeStackNavigator();
 
@@ -65,10 +63,10 @@ export default function App() {
         <NavigationContainer>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
               <Stack.Screen name="Auth" component={AuthScreen} />
-              <Stack.Screen name="Initial" component={InitialBackground} />
               <Stack.Screen name="Main" component={BottomNav} />
-            </Stack.Navigator>
+            </Stack.Navigator>           
         </NavigationContainer>
+        
       </GestureHandlerRootView>
     </PaperProvider>
   );
