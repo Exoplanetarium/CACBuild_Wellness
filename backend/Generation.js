@@ -100,13 +100,7 @@ const interpolateColor = (startColor, endColor, factor) => {
 
 const { width, height } = Dimensions.get("window");
 
-const MusicGenerator = ({
-  prompt,
-  instrumental,
-  trigger,
-  onGenerated,
-  handleShowGenerator,
-}) => {
+const MusicGenerator = ({ prompt, instrumental, trigger, onGenerated, handleShowGenerator }) => {
   const theme = useTheme();
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
@@ -141,16 +135,19 @@ const MusicGenerator = ({
   const generateMusic = async () => {
     setLoading(true);
     setStatus("Generating music...");
-    const url = "https://suno-api-iota-henna.vercel.app/api/generate";
-    const headers = { "Content-Type": "application/json" };
+    const url = "https://api.aimlapi.com/generate";
+    const headers = { 
+      "Authorization": "Bearer 328e529016b940ad8558d1524b852b90",
+      "Content-Type": "application/json" };
     const payload = {
       prompt,
-      make_instrumental: instrumental,
-      wait_audio: false,
+      'make_instrumental': instrumental,
+      'wait_audio': false,
     };
+    console.log(`prompt: ${prompt}, instrumental: ${instrumental}`);
 
     try {
-      const response = await axios.post(url, payload, { headers });
+      const response = await axios.post(url, payload, { headers: headers, responseType: 'arraybuffer' });
       const data = response.data;
       if (data) {
         const audioId = data[0].id;
@@ -181,7 +178,7 @@ const MusicGenerator = ({
   };
 
   const checkAudioStatus = async (audioId) => {
-    const url = `https://suno-api-iota-henna.vercel.app/api/get?ids=${audioId}`;
+    const url = `https://api.aimlapi.com/?ids[0]=${audioId}`;
     const headers = { "Content-Type": "application/json" };
 
     const poll = async () => {

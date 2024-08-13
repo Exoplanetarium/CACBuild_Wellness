@@ -1,24 +1,27 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions, Text } from 'react-native';
 import { Divider, useTheme } from 'react-native-paper';
 import Animated, { useSharedValue, withTiming, useAnimatedStyle, Easing } from 'react-native-reanimated';
 import { Canvas, Path } from '@shopify/react-native-skia';
-import TypingEffect from './TypingEffect'; // Adjust the import path as necessary
+import TypingEffect from './TypingEffect'; 
+import PropTypes from 'prop-types';
 
 const { width } = Dimensions.get('window');
 
-const TextBubble = ({ text, children }) => {
+const TextBubble = ({ text, pointerLocation, children }) => {
   const theme = useTheme();
 
   return (
-    <Animated.View style={{...styles.bubble, backgroundColor: theme.colors.primary}}>
-      <TypingEffect text={text} speed={100} fontSize={16} />
-      <Divider style={{ marginVertical: 20 }} />
-      <View style={styles.childrenContainer}>
-        {children}
-      </View>
-      <View style={styles.pointerContainer}>
-        <Canvas style={styles.pointerCanvas}>
+    <>
+      {pointerLocation === 'left' ? (
+      <Animated.View style={{...styles.leftBubble, backgroundColor: theme.colors.primary, }}>
+        <Text style={{fontSize: 16}}>{text}</Text>
+        {children && <Divider style={{ marginVertical: 20 }} />}
+        <View style={styles.childrenContainer}>
+          {children}
+        </View> 
+        <View style={styles.pointerContainerLeft}>
+          <Canvas style={styles.pointerCanvas}>
             <Path
               path="M 0 0 L 10 10 L 20 0 Z"
               color={theme.colors.primary}
@@ -26,22 +29,61 @@ const TextBubble = ({ text, children }) => {
               stroke={theme.colors.onPrimary}
             />
           </Canvas>
-      </View>
-    </Animated.View>
+        </View>
+      </Animated.View> 
+      ) : (
+      <Animated.View style={{...styles.rightBubble, backgroundColor: theme.colors.primary, }}>
+        <Text style={{fontSize: 16}}>{text}</Text>
+        {children && <Divider style={{ marginVertical: 20 }} />}
+        <View style={styles.childrenContainer}>
+          {children}
+        </View> 
+        <View style={styles.pointerContainerRight}>
+          <Canvas style={styles.pointerCanvas}>
+            <Path
+              path="M 0 0 L 10 10 L 20 0 Z"
+              color={theme.colors.primary}
+              strokeWidth={2}
+              stroke={theme.colors.onPrimary}
+            />
+          </Canvas>
+        </View>
+      </Animated.View>
+        )
+      }
+    </>
   );
 };
 
 const styles = StyleSheet.create({
-  bubble: {
-    padding: 20,
-    borderRadius: 20,
-    borderWidth: 1,
+  leftBubble: {
+    padding: 15,
+    borderRadius: 15,
     position: 'relative',
+    minWidth: 10, 
+    maxWidth: width - 30, 
+    alignSelf: 'flex-start', 
   },
-  pointerContainer: {
+  rightBubble: {
+    padding: 15,
+    borderRadius: 15,
+    position: 'relative',
+    minWidth: 10,
+    maxWidth: width - 30, 
+    alignSelf: 'flex-end', 
+  },
+  pointerContainerLeft: {
     position: 'absolute',
     bottom: -7,
-    transform: [{ translateX: 20 }],
+    transform: [{ translateX: 10 }],
+    width: 20,
+    height: 10,
+  },
+  pointerContainerRight: {
+    position: 'absolute',
+    bottom: -7,
+    right: 0,
+    transform: [{ translateX: -10 }],
     width: 20,
     height: 10,
   },
@@ -54,5 +96,16 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Ensure children are centered within the bubble
   },
 });
+
+TextBubble.propTypes = {
+  text: PropTypes.string.isRequired,
+  pointerLocation: PropTypes.oneOf(['left', 'right']),
+  children: PropTypes.node,
+};
+
+// Default props in case they are not provided
+TextBubble.defaultProps = {
+  pointerLocation: 'left', // Default value if not provided
+};
 
 export default TextBubble;

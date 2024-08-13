@@ -1,6 +1,6 @@
 import { Button, StyleSheet, Text, View, Image } from 'react-native';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-import PanBackground from './PanBackground'
+import Home from './Home'
 import SettingsTab from './SettingsTab';
 import MusicTab from './MusicTab';
 import TestPlayer from './TestPlayer';
@@ -20,7 +20,7 @@ export default function BottomNav() {
       barStyle={{ backgroundColor: theme.colors.primaryContainer }}
       activeIndicatorStyle={{ backgroundColor: theme.colors.secondary }}
     >
-      <Tab.Screen name="Home" component={PanBackground} />
+      <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Music" component={MusicTab} />
       <Tab.Screen name="Settings" component={SettingsTab} />
     </Tab.Navigator>

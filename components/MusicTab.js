@@ -44,7 +44,7 @@ export default function MusicTab() {
   };
 
   const generatePrompt = () => {
-    return `Generate music with tempo:${value}bpm,genres:${genreList},mood:${convertMood(moodPercent)}.Think creatively & dont be repetitive`;
+    return `Generate music with tempo:${value}bpm,genres:${genreList},mood:${convertMood(moodPercent)}.Think creatively and dont be repetitive`;
   };
 
   const handleGenerateMusic = () => {
