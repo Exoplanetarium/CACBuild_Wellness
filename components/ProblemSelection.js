@@ -11,7 +11,9 @@ Easing,
   withTiming,
 } from 'react-native-reanimated';
 import Carousel from 'react-native-reanimated-carousel';
+import { useNavigation } from '@react-navigation/native';
 import TextBubble from './TextBubble';
+import BackButton from './BackButton';
 
 const { width } = Dimensions.get('window');
 const PAGE_WIDTH = 120;
@@ -19,8 +21,9 @@ const PAGE_HEIGHT = 40;
 
 const categories = ['Family', 'Work', 'Health', 'Relationships', 'Finance', 'Other'];
 
-const ProblemSelection = ({ onSubmit }) => {
+const ProblemSelection = ({ onProblemSubmit }) => {
   const theme = useTheme();
+  const navigation = useNavigation();
   const carouselRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState(categories[0]); 
   const [details, setDetails] = useState('');
@@ -31,7 +34,8 @@ const ProblemSelection = ({ onSubmit }) => {
   };
 
   const handleSubmit = () => {
-    onSubmit({ category: selectedCategory, details });
+    const problemData = { category: selectedCategory, details };
+    onProblemSubmit(problemData);
   };
 
   const renderItem = ({ item, index, animationValue }) => {
@@ -48,37 +52,38 @@ const ProblemSelection = ({ onSubmit }) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.onSecondary }]}>
-      <TextBubble text="What's bothering you?" />
-      <Carousel
-        ref={carouselRef}
-        data={categories}
-        renderItem={renderItem}
-        width={110}
-        height={PAGE_HEIGHT}
-        style={styles.carousel}
-        sliderWidth={width}
-        inactiveSlideOpacity={0.5}
-        onSnapToItem={handleCategorySelect} // Automatically select the central item
-      />
-      <TextInput
-        label="Additional details (optional)"
-        value={details}
-        onChangeText={setDetails}
-        multiline
-        numberOfLines={4}
-        style={[styles.textInput, { backgroundColor: theme.colors.secondaryContainer }]}
-        placeholder="Type more details here..."
-        placeholderTextColor={theme.colors.onSecondaryContainer}
-      />
-      <Button
-        mode="contained"
-        onPress={handleSubmit}
-        style={[styles.submitButton, { backgroundColor: theme.colors.primary }]}
-      >
-        Submit
-      </Button>
-    </View>
+    <>
+      <View style={[styles.container, { backgroundColor: theme.colors.onSecondary }]}>
+        <Carousel
+          ref={carouselRef}
+          data={categories}
+          renderItem={renderItem}
+          width={110}
+          height={PAGE_HEIGHT}
+          style={styles.carousel}
+          sliderWidth={width}
+          inactiveSlideOpacity={0.5}
+          onSnapToItem={handleCategorySelect} // Automatically select the central item
+        />
+        <TextInput
+          label="Additional details (optional)"
+          value={details}
+          onChangeText={setDetails}
+          multiline
+          numberOfLines={4}
+          style={[styles.textInput, { backgroundColor: theme.colors.secondaryContainer }]}
+          placeholder="Type more details here..."
+          placeholderTextColor={theme.colors.onSecondaryContainer}
+        />
+        <Button
+          mode="contained"
+          onPress={handleSubmit}
+          style={[styles.submitButton, { backgroundColor: theme.colors.primary }]}
+        >
+          Submit
+        </Button>
+      </View>
+    </>
   );
 };
 
@@ -150,11 +155,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     justifyContent: 'center',
-    borderRadius: 15,
     minWidth: '100%',
+    borderRadius: 8,
   },
   carousel: {
-    marginTop: 32,
+    marginTop: 16,
     marginBottom: 16,
     width: '100%',
     justifyContent: 'center'

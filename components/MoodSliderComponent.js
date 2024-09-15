@@ -3,12 +3,12 @@ import { View, StyleSheet, Text } from 'react-native';
 import { Button, useTheme } from 'react-native-paper';
 import Slider from '@react-native-community/slider';
 
-const MoodSliderComponent = ({ onMoodSubmit, onSlidingStart, onSlidingComplete }) => {
+const MoodSliderComponent = ({ onMoodSubmit }) => {
   const theme = useTheme();
   const [moods, setMoods] = useState({
     happiness: 0,
     stress: 0,
-    anxiety: 0,
+    energy: 0,
     focus: 0,
   });
 
@@ -17,10 +17,6 @@ const MoodSliderComponent = ({ onMoodSubmit, onSlidingStart, onSlidingComplete }
       ...prevMoods,
       [mood]: value,
     }));
-  };
-
-  const handleSubmit = () => {
-    onMoodSubmit(moods);
   };
 
   return (
@@ -45,15 +41,13 @@ const MoodSliderComponent = ({ onMoodSubmit, onSlidingStart, onSlidingComplete }
               minimumTrackTintColor={theme.colors.primary}
               maximumTrackTintColor={theme.colors.accent}
               thumbTintColor={theme.colors.primary}
-              onSlidingStart={onSlidingStart} // Disable scrolling on start
-              onSlidingComplete={onSlidingComplete} // Enable scrolling on complete
             />
             </View>
 
           </View>
         ))}
       </View>
-      <Button mode="contained" onPress={handleSubmit} style={[styles.submitButton, { backgroundColor: theme.colors.primary }]}>
+      <Button mode="contained" onPress={() => onMoodSubmit(moods)} style={[styles.submitButton, { backgroundColor: theme.colors.primary }]}>
         Submit Mood Levels
       </Button>
     </View>

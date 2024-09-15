@@ -4,6 +4,7 @@ import { useTheme, RadioButton, Checkbox, Provider, Card, Button, } from 'react-
 import Slider from '@react-native-community/slider';
 import CustomSlider from './CustomSlider';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import BackButton from './BackButton';
 import MusicGenerator from '../backend/Generation'
 
 // Get screen dimensions
@@ -83,6 +84,8 @@ export default function MusicTab() {
   };
 
   return (
+    <>
+    <BackButton />
     <View style={{backgroundColor: theme.colors.onSecondary, ...styles.container}}>
       {showCard ? (
       <Card style={{backgroundColor: theme.colors.primaryContainer, ...styles.card}} >
@@ -170,6 +173,7 @@ export default function MusicTab() {
         </>
       )}
     </View>
+    </>
   );
 
   

@@ -1,12 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { TextInput, Button, Text, useTheme } from 'react-native-paper';
 import { signUp, logIn, logOut } from './auth';
+import Orientation from 'react-native-orientation-locker';
 
 const AuthScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const theme = useTheme();
+
+  useEffect(() => {
+    Orientation.lockToPortrait();
+  }, []);
 
   // Modified handleSignUp to await the signUp function
   const handleSignUp = async () => {

@@ -135,10 +135,8 @@ const MusicGenerator = ({ prompt, instrumental, trigger, onGenerated, handleShow
   const generateMusic = async () => {
     setLoading(true);
     setStatus("Generating music...");
-    const url = "https://api.aimlapi.com/generate";
-    const headers = { 
-      "Authorization": "Bearer 328e529016b940ad8558d1524b852b90",
-      "Content-Type": "application/json" };
+    const url = "https://suno-api-public.vercel.app/api/generate";
+    const headers = { "Content-Type": "application/json" };
     const payload = {
       prompt,
       'make_instrumental': instrumental,
@@ -147,7 +145,7 @@ const MusicGenerator = ({ prompt, instrumental, trigger, onGenerated, handleShow
     console.log(`prompt: ${prompt}, instrumental: ${instrumental}`);
 
     try {
-      const response = await axios.post(url, payload, { headers: headers, responseType: 'arraybuffer' });
+      const response = await axios.post(url, payload, { headers: headers });
       const data = response.data;
       if (data) {
         const audioId = data[0].id;
@@ -178,7 +176,7 @@ const MusicGenerator = ({ prompt, instrumental, trigger, onGenerated, handleShow
   };
 
   const checkAudioStatus = async (audioId) => {
-    const url = `https://api.aimlapi.com/?ids[0]=${audioId}`;
+    const url = `https://suno-api-public.vercel.app/api/get?ids[0]=${audioId}`;
     const headers = { "Content-Type": "application/json" };
 
     const poll = async () => {

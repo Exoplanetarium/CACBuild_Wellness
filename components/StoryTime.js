@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, ScrollView, ActivityIndicator } from 'react-native';
 import { useTheme, Button } from 'react-native-paper';
+import BackButton from './BackButton';
 import axios from 'axios';
 import { OPENAI_API_KEY } from '@env';
 
-const StoryTime = ({ problemData, moodLevels }) => {
+const StoryTime = ({ moodLevels, problemData }) => {
   const theme = useTheme();
   const [storySections, setStorySections] = useState([]);
   const [currentSection, setCurrentSection] = useState(0);
@@ -60,10 +61,12 @@ const StoryTime = ({ problemData, moodLevels }) => {
   };
 
   return (
+    <>
+    <BackButton />
     <View style={[styles.container, { backgroundColor: theme.colors.onSecondary }]}>
       {loading ? (
         <View>
-        <Text style={{ color: theme.colors.onBackground, marginBottom: 10, fontSize: 16 }}>Generating an inspirational story...</Text>
+        <Text style={{ color: theme.colors.onBackground, marginBottom: 10, fontSize: 16, textAlign: 'center' }}>Generating an inspirational story...</Text>
         <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       ) : (
@@ -94,6 +97,7 @@ const StoryTime = ({ problemData, moodLevels }) => {
         </>
       )}
     </View>
+    </>
   );
 };
 
@@ -106,7 +110,7 @@ const styles = StyleSheet.create({
   storySection: {
     fontSize: 16,
     lineHeight: 24,
-    marginBottom: 16,
+    marginTop: 50,
   },
   navigationButtons: {
     flexDirection: 'row',

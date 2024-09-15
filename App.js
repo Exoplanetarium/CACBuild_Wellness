@@ -54,16 +54,21 @@ const theme4 = {
   }
 };
 
-
-
 export default function App() {
+
   return (
     <PaperProvider theme={theme4}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <NavigationContainer>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
               <Stack.Screen name="Auth" component={AuthScreen} />
-              <Stack.Screen name="Main" component={BottomNav} />
+              <Stack.Screen name="Main">
+                {(props) => 
+                  <BottomNav
+                    {...props}
+                  />
+                }
+              </Stack.Screen>
             </Stack.Navigator>           
         </NavigationContainer>
         
@@ -73,6 +78,7 @@ export default function App() {
 }
 
 import firebase from '@react-native-firebase/app';
+import SetupHome from './components/SetupHome';
 
 // Initialize Firebase
 if (!firebase.apps.length) {
