@@ -3,9 +3,10 @@ import { PaperProvider } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import 'react-native-reanimated';
 import BottomNav from './components/BottomNav';
 import AuthScreen from './components/AuthScreen';
-import TextBubble from './components/TextBubble';
+
 
 const Stack = createNativeStackNavigator();
 

@@ -15,6 +15,7 @@ import StoryTime from './StoryTime';
 import Buddy from './Buddy';
 import SetupHome from './SetupHome';
 import LoadingCircle from './LoadingCircle';
+import MoodInsightsWidget from './MoodInsightsWidget';
 
 const { width } = Dimensions.get('window');
 const size = 100;
@@ -31,22 +32,9 @@ const exampleMoodLog = [
   { mood: "Annoyed", moodValue: -10, notes: 'A bit annoyed, but nothing major', date: '01/07' },
 ];
 
-const rows = 15; // Number of rows in the loading animation grid
-const columns = 4; // Number of columns in the loading animation grid
-
-// Colors for the loading squares based on their corresponding features
-const colors = [
-  ['#486be8', '#56f7f2'], // Buddy
-  ['#FF5F6D', '#FFC371'], // Inspirational Stories
-  ['#eb6d9f', '#467ae1'], // Mood Tracker
-  ['#00C9FF', '#92FE9D'], // Meditation
-  ['#ffcf5e', '#ed5103'], // Calming Music
-];
-
-const Home = ({ streak, loggedToday, setMoodLevels, moodLevels, setProblemData, problemData }) => {
+const Home = ({ streak, loggedToday, setMoodLevels, moodLevels, setProblemData, problemData, moodLog }) => {
   const theme = useTheme();
   const navigation = useNavigation();
-  const [moodLog, setMoodLog] = useState(exampleMoodLog); // Mood log data for testing
   const [dynamicWidget, setDynamicWidget] = useState(null); // Current dynamic widget to display
   const [loading, setLoading] = useState(false); // Loading state for the animation
   const [currentStep, setCurrentStep] = useState(0); // Current step in the setup process
@@ -81,149 +69,10 @@ const Home = ({ streak, loggedToday, setMoodLevels, moodLevels, setProblemData, 
     setCurrentStep(3);
   };
 
-  // Create shared values for each column's position and gradient animation
-  const positions = Array(columns).fill(null).map((_, index) => useSharedValue(index % 2 === 0 ? -100 : 100)); // Initial positions
-  const gradientPositions = Array(columns * rows).fill(null).map(() => useSharedValue(-1)); // For each square's gradient
-
-  const [selectedSquares, setSelectedSquares] = useState(Array(columns).fill(null)); // Track which squares are selected
-
   useEffect(() => {
-    if (loading) {
-      // Initial instant "animation" to move squares up by two squares' height
-      positions.forEach((position, index) => {
-        position.value = withTiming(position.value + (index % 2 === 0 ? -100 : 100), {
-          duration: 0, // Instant move
-        });
-      });
-
-      // Start the main animation for each column
-      positions.forEach((position, index) => {
-        const direction = index % 2 === 0 ? 1 : -1; // Alternating directions
-        position.value = withRepeat(
-          withTiming(direction * 10, {
-            duration: 2000,
-          }),
-          -1,
-          true
-        );
-      });
-
-      // Start the gradient animation for each square
-      gradientPositions.forEach((gradientPosition) => {
-        gradientPosition.value = withRepeat(
-          withTiming(2, {
-            duration: 1000,
-            easing: Easing.linear,
-          }),
-          -1,
-          true
-        );
-      });
-
-      // Simulate loading before displaying the feature colors
-      setTimeout(() => {
-        selectRandomSquares();
-        setTimeout(() => {
-          setLoading(false);
-        }, 2000); // Display the feature colors for 2 seconds
-      }, 3000); // Duration of loading animation before displaying the feature colors
-    }
-  }, [loading]);
-
-  // Function to generate a random integer within a specified range
-  const getRandomInt = (min, max) => {
-    const minCeiled = Math.ceil(min);
-    const maxFloored = Math.floor(max);
-    return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
-  }
-
-  // Function to select random squares for the gradient animation
-  const selectRandomSquares = () => {
-    const selected = positions.map(() => Math.floor(getRandomInt(4, 8) / 10 * rows));
-    setSelectedSquares(selected);
-  };
-
-  // Define animated styles for each column based on their position
-  const animatedStyles = positions.map((position) =>
-    useAnimatedStyle(() => {
-      return {
-        transform: [{ translateY: position.value }],
-      };
-    })
-  );
-
-  // Define animated styles for the gradient animation in each square
-  const gradientStyles = gradientPositions.map((gradientPosition) =>
-    useAnimatedStyle(() => {
-      return {
-        transform: [{ translateX: gradientPosition.value * width * 0.4 }], // Adjusting the transform to simulate diagonal movement
-      };
-    })
-  );
-
-
-  // Function to render the loading animation grid
-  const renderLoadingSquares = () => {
-    return (
-      <View style={{...styles.container, backgroundColor: theme.colors.onSecondary}}>
-        <View style={styles.animationHeader}>
-          <Text style={[styles.heading, { color: theme.colors.primary }]}>
-            Personalizing 
-            Your Experience...
-          </Text>
-        </View>
-        <View style={styles.gridContainer}>
-          {Array(columns).fill(null).map((_, colIndex) => (
-            <View key={colIndex} style={styles.column}>
-              {Array(rows).fill(null).map((_, rowIndex) => (
-                <Animated.View key={rowIndex} style={[styles.square, animatedStyles[colIndex]]}>
-                  <View style={styles.squareContainer}>
-                    {selectedSquares[colIndex] === rowIndex ? (
-                      <LinearGradient
-                        colors={colors[colIndex]}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={styles.gradientBackground}
-                      />
-                    ) : (
-                      <>
-                        <LinearGradient
-                          colors={['rgb(72, 85, 100)', 'rgb(36, 50, 64)', 'rgb(15, 25, 40)']}
-                          start={{ x: 0, y: 0 }}
-                          end={{ x: 1, y: 1 }}
-                          style={styles.gradientBackground}
-                        />
-                        <Animated.View style={[styles.gradientShine, gradientStyles[colIndex * rows + rowIndex]]} />
-                      </>
-                    )}
-                  </View>
-                </Animated.View>
-              ))}
-            </View>
-          ))}
-        </View>
-      </View>
-    );
-  };
-
-  useEffect(() => {
-    loadMoodLog();
     determineDynamicWidget();
   }, [loggedToday, moodLevels, problemData]);
 
-  // Function to load mood log from AsyncStorage
-  const loadMoodLog = async () => {
-    try {
-      const storedMoodLog = await AsyncStorage.getItem('moodLog');
-      if (storedMoodLog) {
-        setMoodLog(JSON.parse(storedMoodLog));
-      }
-    } catch (error) {
-      console.error('Failed to load mood log:', error);
-    }
-  };
-
-  // Function to determine which dynamic widget to display based on current state
   // Function to determine which dynamic widget to display based on current state
   const determineDynamicWidget = () => {
     if (!loggedToday) {
@@ -337,7 +186,7 @@ const Home = ({ streak, loggedToday, setMoodLevels, moodLevels, setProblemData, 
   if (loading) {
     return (
       <LoadingCircle />
-    ); // Show loading squares animation
+    );
   }
 
   // Adjusted rendering condition: If you're in setup step (i.e., `currentStep === 0`), show `SetupHome`.
@@ -380,40 +229,8 @@ const Home = ({ streak, loggedToday, setMoodLevels, moodLevels, setProblemData, 
         </TouchableOpacity>
       )}
 
-      {/* Mood Tracker Widget */}
-      <Card style={styles.card}>
-        <Card.Content>
-          {moodLog.length > 0 ? (
-            <View >
-              <View style={{overflow: 'hidden', borderRadius: 8}}>
-              <LineChart
-                data={{
-                  labels: getFilteredDates(),
-                  datasets: [{
-                    data: compileMoodData().map((log) => log.averageMood),
-                    color: (opacity = 1, index) => compileMoodData()[index]?.color || theme.colors.primary,
-                  }],
-                }}
-                width={width - 32}
-                height={220}
-                chartConfig={{
-                  backgroundColor: theme.colors.background,
-                  backgroundGradientFrom: theme.colors.background,
-                  backgroundGradientTo: theme.colors.background,
-                  decimalPlaces: 0,
-                  color: (opacity = 1) => theme.colors.primary,
-                  labelColor: (opacity = 1) => theme.colors.onBackground,
-                }}
-                style={styles.chart}
-              />
-              </View>
-              <Text style={[styles.chartHint, { color: theme.colors.primary }]}>Mood Tracker</Text>
-            </View>
-          ) : (
-            <Text style={[styles.noDataText, { color: theme.colors.onBackground }]}>No mood logs available.</Text>
-          )}
-        </Card.Content>
-      </Card>
+      {/* Mood Insi--ghts Widget */}
+      {moodLog.length > 0 && <MoodInsightsWidget moodLog={moodLog} />}
 
       {/* Additional widgets */}
       <Card style={styles.card}>

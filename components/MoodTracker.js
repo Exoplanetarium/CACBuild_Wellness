@@ -22,49 +22,15 @@ const exampleMoodLog = [
   { mood: "Annoyed", moodValue: -10, notes: 'A bit annoyed, but nothing major', date: '01/07' },
 ];  
 
-const MoodTracker = ({ streak, loggedToday, onMoodLogged }) => {
+const MoodTracker = ({ streak, loggedToday, onMoodLogged, moodLog, resetMoodLog }) => {
   const theme = useTheme();
   const [mood, setMood] = useState('');
-  const [moodLog, setMoodLog] = useState(exampleMoodLog); // testing purposes
   const [notes, setNotes] = useState('');
   const [showLogs, setShowLogs] = useState(false);
   const [chartVisible, setChartVisible] = useState(false);
 
   // Add invisible points at -100 and 100 to ensure full y-axis range
   const invisiblePoints = [100, -100];
-
-  useEffect(() => {
-    loadMoodLog();
-  }, []);
-
-  const loadMoodLog = async () => {
-    try {
-      const storedMoodLog = await AsyncStorage.getItem('moodLog');
-      if (storedMoodLog) {
-        setMoodLog(JSON.parse(storedMoodLog));
-      }
-    } catch (error) {
-      console.error('Failed to load mood log:', error);
-    }
-  };
-
-  const saveMoodLog = async (newLog) => {
-    try {
-      await AsyncStorage.setItem('moodLog', JSON.stringify(newLog));
-    } catch (error) {
-      console.error('Failed to save mood log:', error);
-    }
-  };
-
-  const resetMoodLog = async () => {
-    try {
-      await AsyncStorage.removeItem('moodLog');
-      setMoodLog([]);
-      Alert.alert('Mood logs have been reset.');
-    } catch (error) {
-      console.error('Failed to reset mood logs:', error);
-    }
-  };
 
   const validateAndConvertMood = async (moodDescription) => {
     try {
@@ -109,16 +75,16 @@ const MoodTracker = ({ streak, loggedToday, onMoodLogged }) => {
       return;
     }
   
-    const today = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' });
-    const newLog = { mood: moodDescription, moodValue, notes, date: today }; 
-    const updatedMoodLog = [...moodLog, newLog];
-  
-    setMoodLog(updatedMoodLog);
-    saveMoodLog(updatedMoodLog);
+    const today = new Date();
+    const dateString = today.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' });
+
+    const newLog = { mood: moodDescription, moodValue, notes, date: dateString };
+
+    // Call the handler passed from BottomNav
+    onMoodLogged(newLog);
+
     setMood('');
     setNotes('');
-
-    onMoodLogged();
   };
 
   const compileMoodData = () => {
@@ -180,12 +146,14 @@ const MoodTracker = ({ streak, loggedToday, onMoodLogged }) => {
     <>
     <BackButton />
       {chartVisible ? (
+        <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
         <FullScreenChart
           onClose={closeChart}
           compileMoodData={compileMoodData}
           getFilteredDates={getFilteredDates}
           theme={theme}
         />
+        </View>
       ) : (
         <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
           <Text style={[styles.heading, { color: theme.colors.primary }]}>Track Your Mood</Text>
@@ -274,6 +242,7 @@ const MoodTracker = ({ streak, loggedToday, onMoodLogged }) => {
                         },
                         useShadowColorFromDataset: true,
                       }}
+                      bezier
                       style={styles.chart}
                     />
                     </View>

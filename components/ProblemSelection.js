@@ -19,7 +19,7 @@ const { width } = Dimensions.get('window');
 const PAGE_WIDTH = 120;
 const PAGE_HEIGHT = 40;
 
-const categories = ['Family', 'Work', 'Health', 'Relationships', 'Finance', 'Other'];
+const categories = ['None', 'Family', 'Work', 'Health', 'Relations', 'Finance', 'Other'];
 
 const ProblemSelection = ({ onProblemSubmit }) => {
   const theme = useTheme();
@@ -99,7 +99,6 @@ const Item = ({ animationValue, label, onPress, isSelected }) => {
       );
   
       const translateYValue = isSelected ? -5 : 0;
-  
       return {
         opacity,
         transform: [{ translateY: withTiming(translateYValue, { duration: 200, }) }],
