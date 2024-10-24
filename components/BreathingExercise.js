@@ -1,6 +1,4 @@
-// BreathingExercise.js
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Alert, Dimensions } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -12,12 +10,31 @@ import Animated, {
   withSequence,
   withRepeat,
   withDelay,
+  interpolateColor,
 } from 'react-native-reanimated';
 import { useTheme, Button } from 'react-native-paper';
+import BackButton from './BackButton';
 import Svg, { Path } from 'react-native-svg';
 
 // Create animated Path
 const AnimatedPath = Animated.createAnimatedComponent(Path);
+
+// Helper component for Concentric Squares
+const ConcentricSquare = ({ path, animatedOpacity }) => {
+  const animatedProps = useAnimatedProps(() => ({
+    opacity: animatedOpacity.value,
+  }));
+
+  return (
+    <AnimatedPath
+      d={path}
+      stroke="#FFFFFF" // Default stroke color; will be overridden via animatedProps if needed
+      strokeWidth="4"
+      fill="none"
+      animatedProps={animatedProps}
+    />
+  );
+};
 
 const BreathingExercise = ({ moodLevels, problemData }) => {
   const theme = useTheme();
@@ -41,11 +58,11 @@ const BreathingExercise = ({ moodLevels, problemData }) => {
   const containerSize = 200; // Size of the animation container
   const boxSize = 50; // Size of the moving box
 
-  const maxX = containerSize - boxSize; // Maximum translation on X-axis
-  const maxY = containerSize - boxSize; // Maximum translation on Y-axis
-
   // Box Mode Shared Values
-  const strokeDashoffset = useSharedValue(400); // Adjust based on path length
+  const strokeDashoffset = useSharedValue(pathLength); // Adjust based on path length
+
+  // Define the main square path
+  const mainSquarePath = "M50 50 H150 V150 H50 Z";
 
   // Define the square path
   const squarePath = "M50 50 H150 V150 H50 Z";
@@ -58,7 +75,7 @@ const BreathingExercise = ({ moodLevels, problemData }) => {
     Balanced: { inhale: 3500, exhale: 3500, hold: 2000 },
   };
 
-  const animationDuration = animationDurations[exerciseType].inhale;
+  const inhaleDuration = animationDurations[exerciseType].inhale;
   const exhaleDuration = animationDurations[exerciseType].exhale;
   const holdDuration = animationDurations[exerciseType].hold;
 
@@ -118,6 +135,35 @@ const BreathingExercise = ({ moodLevels, problemData }) => {
     };
   });
 
+  // Shared Values for Main Square Stroke Color
+  const mainSquarePhaseValue = useSharedValue(0); // 0: Normal, 1: Exhale
+
+  // Shared Values for Concentric Squares' Opacity (max 5)
+  const maxConcentricSquares = 5;
+  const concentricSquaresOpacity = useRef(
+    Array.from({ length: maxConcentricSquares }, () => useSharedValue(0))
+  ).current;
+
+  // Calculate the number of concentric squares based on holdDuration
+  const numConcentricSquares = Math.min(Math.floor(holdDuration / 1000), maxConcentricSquares);
+
+  // Function to generate concentric square paths
+  const getConcentricSquarePath = (index) => {
+    const inset = 50 - index * 10; // 50, 40, 30, etc.
+    const size = 100 + index * 20; // 100, 120, 140, etc.
+    return `M${inset} ${inset} H${inset + size} V${inset + size} H${inset} Z`;
+  };
+
+  // Define the main square's animated stroke color
+  const mainSquareAnimatedProps = useAnimatedProps(() => ({
+    strokeDashoffset: strokeDashoffset.value,
+    stroke: interpolateColor(
+      mainSquarePhaseValue.value,
+      [0, 1],
+      [exerciseColors[0], theme.colors.background]
+    ),
+  }));
+
   // Animation styles for Box Mode
   const animatedBoxStyle = useAnimatedStyle(() => {
     return {
@@ -147,7 +193,7 @@ const BreathingExercise = ({ moodLevels, problemData }) => {
     setPhase('Inhale');
     scale.value = withTiming(
       2,
-      { duration: animationDuration, easing: Easing.inOut(Easing.ease) },
+      { duration:inhaleDuration, easing: Easing.inOut(Easing.ease) },
       (finished) => {
         if (finished && isBreathing) {
           // Transition to Hold Phase
@@ -188,36 +234,33 @@ const BreathingExercise = ({ moodLevels, problemData }) => {
     runOnJS(setPhase)('Inhale');
     strokeDashoffset.value = withTiming(
       0,
-      { duration: animationDuration, easing: Easing.linear },
+      { duration: inhaleDuration, easing: Easing.linear },
       (finished) => {
         if (finished && isBreathing && animationStyle === 'box') {
           // Hold Phase
           runOnJS(setPhase)('Hold');
-          // Hold for holdDuration then start Exhale
-          // Using withTiming on a dummy value to create a delay
-          // Since setTimeout cannot be used, we simulate the delay with withTiming
-          // by animating a dummy shared value and triggering exhaleBox in the callback
-          const dummy = useSharedValue(0);
-          dummy.value = withTiming(
-            1,
-            { duration: holdDuration, easing: Easing.linear },
-            (finished) => {
-              if (finished && isBreathing && animationStyle === 'box') {
-                runOnJS(exhaleBox)();
-              }
-            }
-          );
+
+          // Animate concentric squares' opacity with staggered delays using withDelay
+          concentricSquaresOpacity.slice(0, numConcentricSquares).forEach((opacity, index) => {
+            opacity.value = withDelay(
+              index * 1000, // 1 second delay per square
+              withTiming(1, { duration: 500, easing: Easing.linear })
+            );
+          });
+
+          // After holdDuration, start Exhale
+          runOnJS(startExhaleBox)();
         }
       }
     );
   };
 
-  // Function to handle Exhale Phase
-  const exhaleBox = () => {
-    if (!isBreathing || animationStyle !== 'box') return;
-
-    // Exhale Phase: Reset the dash offset to erase the square
+  // Function to handle Exhale Phase in Box Mode
+  const startExhaleBox = () => {
+    // Transition to Exhale Phase
     runOnJS(setPhase)('Exhale');
+    mainSquarePhaseValue.value = 1; // Trigger color change
+
     strokeDashoffset.value = withTiming(
       pathLength,
       { duration: exhaleDuration, easing: Easing.linear },
@@ -225,20 +268,35 @@ const BreathingExercise = ({ moodLevels, problemData }) => {
         if (finished && isBreathing && animationStyle === 'box') {
           // Hold Phase after Exhale
           runOnJS(setPhase)('Hold');
-          // Hold for holdDuration then restart the cycle
-          const dummy = useSharedValue(0);
-          dummy.value = withTiming(
-            1,
-            { duration: holdDuration, easing: Easing.linear },
-            (finished) => {
-              if (finished && isBreathing && animationStyle === 'box') {
-                // Restart the breathing cycle
-                runOnJS(startBreathingCycle)();
-              }
-            }
-          );
+          mainSquarePhaseValue.value = 0; // Reset color
+
+          // Animate concentric squares' opacity to 0 with staggered delays using withDelay
+          concentricSquaresOpacity.slice(0, numConcentricSquares).forEach((opacity, index) => {
+            opacity.value = withDelay(
+              index * 1000, // 1 second delay per square
+              withTiming(0, { duration: 500, easing: Easing.linear })
+            );
+          });
+
+          // Restart the breathing cycle after holdDuration
+          // Use withDelay to wait for holdDuration before restarting
+          runOnJS(restartBreathingCycle)();
         }
       }
+    );
+  };
+
+  // Function to restart the breathing cycle after Exhale Hold
+  const restartBreathingCycle = () => {
+    // Use withDelay to wait for holdDuration before restarting
+    withDelay(
+      holdDuration,
+      () => {
+        if (isBreathing && animationStyle === 'box') {
+          animateBoxCycle();
+        }
+      },
+      []
     );
   };
 
@@ -264,6 +322,12 @@ const BreathingExercise = ({ moodLevels, problemData }) => {
 
     // Reset Box Mode animations
     strokeDashoffset.value = pathLength;
+    mainSquarePhaseValue.value = 0;
+
+    // Reset Concentric Squares' opacity
+    concentricSquaresOpacity.forEach((opacity) => {
+      opacity.value = 0;
+    });
 
     // Reset phase
     setPhase('');
@@ -294,6 +358,8 @@ const BreathingExercise = ({ moodLevels, problemData }) => {
   // Conditionally render based on `showExercise`
   if (!showExercise) {
     return (
+      <>
+      <BackButton />
       <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <Text style={[styles.introText, { color: theme.colors.onBackground }]}>
           {exerciseType === 'Calming'
@@ -322,51 +388,69 @@ const BreathingExercise = ({ moodLevels, problemData }) => {
           Start Exercise
         </Button>
       </View>
+      </>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {/* Animation Container */}
-      <View style={styles.animationContainer}>
-        {animationStyle === 'circle' ? (
-          <Animated.View style={[styles.circle, animatedCircleStyle]}>
-            <Animated.View style={[styles.holdCircle, animatedHoldCircleStyle]} />
-            <Text style={[styles.phaseText, { color: theme.colors.onPrimary }]}>{phase}</Text>
-          </Animated.View>
-        ) : (
-          <Svg width={containerSize} height={containerSize}>
-            <AnimatedPath
-              d={squarePath}
-              stroke={exerciseColors[0]}
-              strokeWidth="4"
-              fill="none"
-              strokeDasharray={pathLength}
-              animatedProps={animatedPathProps}
-            />
-          </Svg>
-        )}
-      </View>
+    <>
+    <BackButton />
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        {/* Animation Container */}
+        <View style={styles.animationContainer}>
+          {animationStyle === 'circle' ? (
+            <>
+              {/* Main Circle */}
+              <Animated.View style={[styles.circle, animatedCircleStyle]}>
+                {/* Hold Circle */}
+                <Animated.View style={[styles.holdCircle, animatedHoldCircleStyle]} />
+              </Animated.View>
+              {/* Phase Text */}
+              <Text style={[styles.phaseText, { color: theme.colors.onPrimary }]}>{phase}</Text>
+            </>
+          ) : (
+            <>
+                {/* SVG for Box Mode */}
+                <Svg width={containerSize} height={containerSize}>
+                  {/* Main Square */}
+                  <AnimatedPath
+                    d={mainSquarePath}
+                    strokeWidth="4"
+                    fill="none"
+                    strokeDasharray={pathLength}
+                    animatedProps={mainSquareAnimatedProps}
+                  />
 
-      {/* Phase Text positioned outside the animation container */}
-      {animationStyle === 'box' && (
-        <Text style={[styles.phaseTextOutside, { color: theme.colors.onBackground }]}>
-          {phase}
-        </Text>
-      )}
+                  {/* Concentric Squares */}
+                  {Array.from({ length: numConcentricSquares }, (_, i) => (
+                    <ConcentricSquare
+                      key={`concentric-${i}`}
+                      path={getConcentricSquarePath(i)}
+                      animatedOpacity={concentricSquaresOpacity[i]}
+                    />
+                  ))}
+                </Svg>
+                {/* Phase Text */}
+                <Text style={[styles.phaseTextOutside, { color: theme.colors.onBackground }]}>
+                  {phase}
+                </Text>
+              </>
+            )}
+        </View>
 
-      {/* Stop Breathing Button */}
-      <View style={styles.buttonContainer}>
-        <Button
-          mode="contained"
-          onPress={stopBreathing}
-          style={[styles.button, { backgroundColor: theme.colors.error }]}
-          labelStyle={{ color: theme.colors.onError }}
-        >
-          Stop Exercise
-        </Button>
+        {/* Stop Breathing Button */}
+        <View style={styles.buttonContainer}>
+          <Button
+            mode="contained"
+            onPress={stopBreathing}
+            style={[styles.button, { backgroundColor: theme.colors.error }]}
+            labelStyle={{ color: theme.colors.onError }}
+          >
+            Stop Exercise
+          </Button>
+        </View>
       </View>
-    </View>
+    </>
   );
 };
 
@@ -407,6 +491,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   phaseText: {
+    position: 'absolute',
+    bottom: -40,
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  phaseTextOutside: {
+    marginTop: 20,
     fontSize: 24,
     fontWeight: 'bold',
   },

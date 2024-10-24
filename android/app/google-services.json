@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "103704653066-n9n3c7i4rk63ii1vrmq5al9u3q22136j.apps.googleusercontent.com",
+          "client_id": "103704653066-4d1d0ojd2vn8tr96jga7fg6pih9s8fso.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.anonymous.CACBuild_wellness",
-            "certificate_hash": "162562e1bdaa6fcaaad0888b9f97337d547bed71"
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
           }
         },
         {

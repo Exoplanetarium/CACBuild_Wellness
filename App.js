@@ -7,6 +7,14 @@ import 'react-native-reanimated';
 import BottomNav from './components/BottomNav';
 import AuthScreen from './components/AuthScreen';
 
+// App.js or a dedicated config file
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+
+GoogleSignin.configure({
+  webClientId: '103704653066-0h2jfsl9fnf6dkt0t8d6gbc5ocolhorb.apps.googleusercontent.com', 
+  offlineAccess: true, // if you want to access Google API on behalf of the user FROM YOUR SERVER
+  // You can add additional configuration options here
+});
 
 const Stack = createNativeStackNavigator();
 

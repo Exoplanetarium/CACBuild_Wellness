@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
-import { useTheme, Card } from 'react-native-paper';
+import { useTheme, Card, Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing } from 'react-native-reanimated';
 import Svg, { Circle, Path } from 'react-native-svg';
@@ -16,6 +16,7 @@ import Buddy from './Buddy';
 import SetupHome from './SetupHome';
 import LoadingCircle from './LoadingCircle';
 import MoodInsightsWidget from './MoodInsightsWidget';
+import { logOut } from './auth';
 
 const { width } = Dimensions.get('window');
 const size = 100;
@@ -229,18 +230,11 @@ const Home = ({ streak, loggedToday, setMoodLevels, moodLevels, setProblemData, 
         </TouchableOpacity>
       )}
 
-      {/* Mood Insi--ghts Widget */}
+      {/* Mood Insights Widget */}
       {moodLog.length > 0 && <MoodInsightsWidget moodLog={moodLog} />}
 
       {/* Additional widgets */}
-      <Card style={styles.card}>
-        <Card.Content>
-          <Svg width={size} height={size} viewBox="0 0 100 100">
-            <Circle cx="50" cy="35" r="12" fill={colors2[0]} opacity={1} />
-            <Path d="M30 67 C35 45, 65 45, 70 67 Z" fill={colors2[0]} opacity={1} />
-          </Svg>
-        </Card.Content>
-      </Card>
+      <Button mode="text" onPress={() => logOut} style={{color: theme.colors.primary, position: 'absolute'}}>Log Out</Button>
     </ScrollView>
   </View>
   );

@@ -11,7 +11,8 @@ import Buddy from './Buddy';
 import StoryTime from './StoryTime';
 import MoodTracker from './MoodTracker';
 import BreathingExercise from './BreathingExercise';
-import moment from 'moment'; // Import moment for date handling
+import moment from 'moment'; 
+import auth from '@react-native-firebase/auth'; 
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -22,11 +23,19 @@ const ASYNC_STORAGE_KEYS = {
   MOOD_LOG: 'moodLog',
 };
 
+// Define a function to generate AsyncStorage keys based on UID
+const getAsyncStorageKeys = (uid) => ({
+  STREAK: `streak_${uid}`,
+  LAST_LOGGED_DATE: `lastLoggedDate_${uid}`,
+  MOOD_LOG: `moodLog_${uid}`,
+});
+
 export default function BottomNav() {
   const theme = useTheme();
   const navigation = useNavigation();
 
   // State variables
+  const [user, setUser] = useState(null);
   const [streak, setStreak] = useState(0);
   const [lastLoggedDate, setLastLoggedDate] = useState(null);
   const [loggedToday, setLoggedToday] = useState(false);
@@ -36,17 +45,36 @@ export default function BottomNav() {
   // State to store moodLog
   const [moodLog, setMoodLog] = useState([]);
 
-  // Load moodLog, streak, and lastLoggedDate from AsyncStorage when component mounts
+  // Initialize user and data
   useEffect(() => {
-    initializeStreak();
-    loadMoodLog();
+    const unsubscribe = auth().onAuthStateChanged((currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        initializeStreak(currentUser.uid);
+        loadMoodLog(currentUser.uid);
+      } else {
+        setUser(null);
+        resetData();
+      }
+    });
+
+    return unsubscribe; // Cleanup on unmount
   }, []);
 
+  // Function to reset data when user logs out
+  const resetData = () => {
+    setStreak(0);
+    setLastLoggedDate(null);
+    setLoggedToday(false);
+    setMoodLog([]);
+  };
+
   // Function to initialize streak and loggedToday state
-  const initializeStreak = async () => {
+  const initializeStreak = async (uid) => {
     try {
-      const storedStreak = await AsyncStorage.getItem(ASYNC_STORAGE_KEYS.STREAK);
-      const storedLastLoggedDate = await AsyncStorage.getItem(ASYNC_STORAGE_KEYS.LAST_LOGGED_DATE);
+      const keys = getAsyncStorageKeys(uid);
+      const storedStreak = await AsyncStorage.getItem(keys.STREAK);
+      const storedLastLoggedDate = await AsyncStorage.getItem(keys.LAST_LOGGED_DATE);
       
       let parsedStreak = storedStreak ? parseInt(storedStreak, 10) : 0;
       let parsedLastLoggedDate = storedLastLoggedDate ? storedLastLoggedDate : null;
@@ -68,7 +96,7 @@ export default function BottomNav() {
             // Streak resets
             parsedStreak = 0;
             setStreak(parsedStreak);
-            await AsyncStorage.setItem(ASYNC_STORAGE_KEYS.STREAK, parsedStreak.toString());
+            await AsyncStorage.setItem(keys.STREAK, parsedStreak.toString());
           }
         } else {
           // No previous log, streak starts at 0
@@ -85,9 +113,10 @@ export default function BottomNav() {
   };
 
   // Function to load moodLog from AsyncStorage
-  const loadMoodLog = async () => {
+  const loadMoodLog = async (uid) => {
     try {
-      const storedMoodLog = await AsyncStorage.getItem(ASYNC_STORAGE_KEYS.MOOD_LOG);
+      const keys = getAsyncStorageKeys(uid);
+      const storedMoodLog = await AsyncStorage.getItem(keys.MOOD_LOG);
       if (storedMoodLog) {
         setMoodLog(JSON.parse(storedMoodLog));
       }
@@ -95,22 +124,32 @@ export default function BottomNav() {
       console.error('Failed to load mood log:', error);
     }
   };
-  
+
   // Function to save moodLog to AsyncStorage whenever it changes
   useEffect(() => {
     const saveMoodLog = async () => {
       try {
-        await AsyncStorage.setItem(ASYNC_STORAGE_KEYS.MOOD_LOG, JSON.stringify(moodLog));
+        if (user) {
+          const keys = getAsyncStorageKeys(user.uid);
+          await AsyncStorage.setItem(keys.MOOD_LOG, JSON.stringify(moodLog));
+        }
       } catch (error) {
         console.error('Failed to save mood log:', error);
       }
     };
     saveMoodLog();
-  }, [moodLog]);
+  }, [moodLog, user]);
 
   // Function to handle mood logging
   const handleMoodLog = async (newMoodEntry) => {
     try {
+      if (!user) {
+        Alert.alert('Error', 'No user is signed in.');
+        return;
+      }
+
+      const uid = user.uid;
+      const keys = getAsyncStorageKeys(uid);
       const today = moment().format('YYYY-MM-DD');
       
       if (!loggedToday) {
@@ -120,8 +159,8 @@ export default function BottomNav() {
         setLoggedToday(true);
         
         // Persist streak and lastLoggedDate
-        await AsyncStorage.setItem(ASYNC_STORAGE_KEYS.STREAK, updatedStreak.toString());
-        await AsyncStorage.setItem(ASYNC_STORAGE_KEYS.LAST_LOGGED_DATE, today);
+        await AsyncStorage.setItem(keys.STREAK, updatedStreak.toString());
+        await AsyncStorage.setItem(keys.LAST_LOGGED_DATE, today);
       }
       
       // Update moodLog
@@ -133,13 +172,18 @@ export default function BottomNav() {
     }
   };
 
+  // Function to reset moodLog
   const resetMoodLog = async () => {
     try {
-      await AsyncStorage.removeItem('moodLog');
-      setMoodLog([]);
-      Alert.alert('Mood logs have been reset.');
+      if (user) {
+        const keys = getAsyncStorageKeys(user.uid);
+        await AsyncStorage.removeItem(keys.MOOD_LOG);
+        setMoodLog([]);
+        Alert.alert('Success', 'Mood logs have been reset.');
+      }
     } catch (error) {
       console.error('Failed to reset mood logs:', error);
+      Alert.alert('Error', 'Failed to reset mood logs.');
     }
   };
 

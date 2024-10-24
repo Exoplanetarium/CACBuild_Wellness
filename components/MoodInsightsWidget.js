@@ -1,5 +1,3 @@
-// MoodInsightsWidget.js
-
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Text, Dimensions } from 'react-native';
 import { Card, useTheme } from 'react-native-paper';
